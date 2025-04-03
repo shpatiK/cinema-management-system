@@ -1,6 +1,10 @@
 import express from 'express';
-import sequelize from './db/postgres';  // Import your Sequelize instance
-import Movie from './models/Movie';     // Import your Movie model
+import sequelize from './db/postgres';
+import movieRoutes from './routes/movieRoutes';
+import authRoutes from './routes/authRoutes';
+import { authMiddleware } from './utils/auth';
+import User from './models/User';
+import Movie from './models/Movie';
 
 const app = express();
 const PORT = 3000;
@@ -8,14 +12,24 @@ const PORT = 3000;
 // Middleware
 app.use(express.json());
 
-// Initialize database connection and sync models
+// Database initialization
 async function initializeDatabase() {
   try {
-    await sequelize.authenticate(); // Test connection
-    await sequelize.sync({ alter: true }); // Create tables if they don't exist
+    await sequelize.authenticate();
+    await sequelize.sync({ alter: true }); // Note: Use migrations in production
     console.log('✅ Database connected and tables synced!');
+    
+    // Optional: Create admin user if doesn't exist
+    await User.findOrCreate({
+      where: { username: 'admin' },
+      defaults: {
+        username: 'admin',
+        password: 'admin123' // Change this in production!
+      }
+    });
   } catch (error) {
     console.error('❌ Database connection failed:', error);
+    process.exit(1);
   }
 }
 
@@ -24,29 +38,26 @@ app.get('/', (req, res) => {
   res.send('🎬 Cinema Management System Backend is Running!');
 });
 
-// Get all movies FROM DATABASE (updated route)
-app.get('/movies', async (req, res) => {
-  try {
-    const movies = await Movie.findAll(); // Fetch from PostgreSQL
-    res.json(movies);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch movies' });
-  }
+// Unprotected routes
+app.use('/auth', authRoutes);
+
+// Protected routes (require JWT)
+app.use('/movies', authMiddleware, movieRoutes);
+
+// Error handling middleware (must be last)
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: 'Internal Server Error',
+    message: err.message 
+  });
 });
 
-// Add a new movie (new route)
-app.post('/movies', async (req, res) => {
-  try {
-    const movie = await Movie.create(req.body);
-    res.status(201).json(movie);
-  } catch (error) {
-    res.status(400).json({ error: 'Invalid movie data' });
-  }
-});
-
-// Start server after DB initialization
+// Start server
 initializeDatabase().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 });
+
+export default app;

@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../db/postgres';
 
-// Define Movie class as a Sequelize model
+// Movie model definition
 class Movie extends Model {}
 
 // Initialize model with schema
@@ -10,9 +10,9 @@ Movie.init(
     // Column: title (string, required)
     title: {
       type: DataTypes.STRING,
-      allowNull: false,  // Disallow null values
+      allowNull: false,  
       validate: {
-        notEmpty: true   // Ensure empty strings aren't allowed
+        notEmpty: true   
       }
     },
 
@@ -20,7 +20,7 @@ Movie.init(
     duration: {
       type: DataTypes.INTEGER,
       validate: {
-        min: 1  // Minimum movie duration: 1 minute
+        min: 1  
       }
     }
   },
@@ -31,7 +31,7 @@ Movie.init(
   }
 );
 
-// Forcefully sync tables (only in development
+// Forcefully sync tables
 (async () => {
     try {
       await sequelize.sync(); // Drops and recreates tables
