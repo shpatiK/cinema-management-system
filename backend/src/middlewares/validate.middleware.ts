@@ -7,6 +7,11 @@ const movieSchema = Joi.object({
 });
 
 const validateMovie: RequestHandler = (req, res, next) => {
+
+  if (req.path.includes('/metadata')) {
+    return next();
+  }
+  
   const { error } = movieSchema.validate(req.body);
   if (error) {
     res.status(400).json({ error: error.details[0].message });
