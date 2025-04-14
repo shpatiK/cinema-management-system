@@ -1,0 +1,20 @@
+# Node modules
+**/node_modules/
+
+# Build artifacts
+**/build/
+**/dist/
+
+# Environment files
+**/.env
+
+# Log files
+**/*.log
+
+# Editor settings
+.vscode/
+.idea/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
