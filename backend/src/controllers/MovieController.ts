@@ -1,12 +1,16 @@
 import { Request, Response } from 'express';
 import Movie from '../models/Movie';
+import path from 'path';
+import fs from 'fs';
 
 
 export default class MovieController {
   // GET all movies
   static getAllMovies = async (req: Request, res: Response): Promise<void> => {
     try {
-      const movies = await Movie.findAll();
+      const movies = await Movie.findAll({
+        attributes: ['id', 'title', 'duration', 'poster_url', 'release_year'] // Explicitly include new fields
+      });
       res.json(movies);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch movies' });
@@ -16,7 +20,7 @@ export default class MovieController {
   // POST new movie
   static createMovie = async (req: Request, res: Response): Promise<void> => {
     try {
-      const movie = await Movie.create(req.body);
+  const movie = await Movie.create(req.body);
       res.status(201).json(movie);
     } catch (error) {
       res.status(400).json({ error: 'Invalid movie data' });

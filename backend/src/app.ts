@@ -7,12 +7,17 @@ import authRoutes from './routes/authRoutes';
 import { authMiddleware } from './utils/auth';
 import User from './models/User';
 import Movie from './models/Movie';
+import cors from 'cors';
+import fileUpload from 'express-fileupload';
 
 const app = express();
 const PORT = 3000;
 
 // Middleware
 app.use(express.json());
+app.use(cors());
+app.use(fileUpload());
+app.use('/posters', express.static('public/posters'));
 
 // Database initialization
 async function initializeDatabase() {
