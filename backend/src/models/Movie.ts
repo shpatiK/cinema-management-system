@@ -22,7 +22,26 @@ Movie.init(
       validate: {
         min: 1  
       }
+    },
+
+    // NEW FIELDS:
+    poster_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      validate: {
+        notEmpty: false,
+        isUrl: true // Validates it's a URL/path
+      }
+    },
+    release_year: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      validate: {
+        min: 1900,
+        max: new Date().getFullYear() + 5 // Allows future releases
+      }
     }
+    
   },
   {
     sequelize,           // Link to database
