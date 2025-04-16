@@ -3,11 +3,10 @@ import { useLocation } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
 
 interface Movie {
-  id: string;
+  id: number;  // Changed from string to number to match MovieCardProps
   title: string;
   year: number;
   image: string;
-  
 }
 
 const SearchPage = () => {
@@ -64,6 +63,7 @@ const SearchPage = () => {
           {results.map((movie) => (
             <MovieCard 
               key={movie.id}
+              id={movie.id}
               title={movie.title}
               year={movie.year}
               image={movie.image}

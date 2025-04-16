@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const ClickableTitle = () => {
-  const words = [
+const Header = () => {
+  const navItems = [
     { text: "MOVIES", path: "/movies" },
     { text: "BOOK", path: "/booking" },
     { text: "EVENTS", path: "/events" },
@@ -12,25 +12,29 @@ const ClickableTitle = () => {
   ];
 
   return (
-    <div className="flex flex-wrap justify-center items-center gap-1 md:gap-3 p-4 bg-blue-900">
-      {words.map((word, index) => (
-        <React.Fragment key={index}>
-          {}
-          {index > 0 && (
-            <span className="text-white text-lg mx-1 md:mx-2">|</span>
-          )}
-          
-          <Link
-            to={word.path}
-            className="text-white hover:text-yellow-300 text-lg md:text-xl font-bold 
-                      transition-colors duration-300 hover:scale-105 transform"
+    // Header.tsx
+<header className="bg-gray-900/90 backdrop-blur-md sticky top-0 z-50">
+  <div className="container mx-auto px-6 py-4">
+    <div className="flex justify-between items-center">
+      <h1 className="text-2xl font-bold text-yellow-400">INOX</h1>
+      <nav className="hidden md:flex space-x-8">
+        {navItems.map((item) => (
+          <Link 
+            key={item.path}
+            to={item.path}
+            className="text-white hover:text-yellow-400 transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-yellow-400 after:transition-all hover:after:w-full"
           >
-            {word.text}
+            {item.text}
           </Link>
-        </React.Fragment>
-      ))}
+        ))}
+      </nav>
+      <button className="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded-full text-black font-bold transition-colors">
+        Login
+      </button>
     </div>
+  </div>
+</header>
   );
 };
 
-export default ClickableTitle;
+export default Header;
