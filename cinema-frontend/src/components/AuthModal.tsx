@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
+import { useAuthModal } from '../context/AuthModalContext';
 
 type AuthMode = 'login' | 'register';
-
-interface AuthModalProps {
-  onClose: () => void;
-}
 
 interface AuthFormData {
   email: string;
@@ -12,7 +9,8 @@ interface AuthFormData {
   name: string;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
+const AuthModal: React.FC = () => {
+  const { isOpen, closeModal } = useAuthModal();
   const [mode, setMode] = useState<AuthMode>('login');
   const [formData, setFormData] = useState<AuthFormData>({
     email: '',
@@ -42,7 +40,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
       if (!response.ok) throw new Error(data.message || 'Authentication failed');
 
       localStorage.setItem('token', data.token);
-      onClose();
+      closeModal();
       window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
@@ -51,18 +49,20 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <div 
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={(e) => e.target === e.currentTarget && closeModal()}
     >
-      <div className="bg-white p-6 rounded-lg w-full max-w-md mx-4">
+      <div className="bg-white p-6 rounded-lg w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">
             {mode === 'login' ? 'Login' : 'Register'}
           </h2>
           <button 
-            onClick={onClose}
+            onClick={closeModal}
             className="text-gray-500 hover:text-gray-700"
           >
             ✕
