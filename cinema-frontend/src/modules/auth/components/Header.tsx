@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuthModal } from '../context/AuthModalContext';
+import { useAuthModal } from '../../../context/AuthModalContext';
 import SearchBar from './SearchBar';
-import inoxLogo from '../assets/images/logo.png'; 
+import inoxLogo from '../../../assets/images/logo.png'; 
 
 const Header = () => {
   const { openModal } = useAuthModal();

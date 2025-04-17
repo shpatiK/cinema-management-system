@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaChair, FaCheck} from 'react-icons/fa';
-
+import { FaArrowLeft, FaChair, FaCheck } from 'react-icons/fa';
 
 type Seat = {
   id: string;
@@ -45,7 +44,6 @@ const BookingPage: React.FC = () => {
   const [ticketCount, setTicketCount] = useState<number>(1);
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
-  // Generate seat data with proper typing
   const generateSeats = (): Seat[] => {
     const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
     const seats: Seat[] = [];
@@ -56,7 +54,7 @@ const BookingPage: React.FC = () => {
           id: `${row}${i}`,
           row,
           number: i,
-          available: Math.random() > 0.3 // 70% chance of being available
+          available: Math.random() > 0.3
         });
       }
     });
@@ -98,8 +96,7 @@ const BookingPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 bg-gray-900 min-h-screen text-white">
-
-      
+      {/* Header Section */}
       <div>
         <button 
           onClick={() => navigate(-1)}
@@ -107,14 +104,14 @@ const BookingPage: React.FC = () => {
         >
           <FaArrowLeft className="mr-2" /> Back to movie
         </button>
-  
+
         <h1 className="text-3xl font-bold mb-2">Select Seats for {movie.title}</h1>
         <div className="mb-8">
           <h2 className="text-xl font-semibold">{showtime.cinema}</h2>
           <p>{showtime.hall} • {showtime.time} • {showtime.type}</p>
         </div>
       </div>
-  
+
       {/* Tickets Selection */}
       <div className="mb-8">
         <label className="block text-lg mb-2">Buy {ticketCount}</label>
@@ -131,12 +128,12 @@ const BookingPage: React.FC = () => {
           ))}
         </select>
       </div>
-  
+
       {/* Screen Indicator */}
       <div className="bg-gray-700 text-white text-center py-2 mb-6 mx-auto w-full border border-gray-600">
         SCREEN
       </div>
-  
+
       {/* Seat Map */}
       <div className="grid grid-cols-10 gap-2 mb-8">
         {seats.map(seat => (
@@ -157,7 +154,7 @@ const BookingPage: React.FC = () => {
           </button>
         ))}
       </div>
-  
+
       {/* Seat Legend */}
       <div className="flex justify-center gap-6 mb-6">
         <div className="flex items-center">
@@ -173,7 +170,7 @@ const BookingPage: React.FC = () => {
           <span>Unavailable</span>
         </div>
       </div>
-  
+
       {/* Selection Summary */}
       <div className="bg-gray-800 p-4 rounded-lg mb-6 border border-gray-700">
         <h3 className="font-bold mb-2">Your Selection</h3>
@@ -187,7 +184,7 @@ const BookingPage: React.FC = () => {
           <p>Please select {ticketCount} seat(s)</p>
         )}
       </div>
-  
+
       {/* Payment Button */}
       <div className="flex justify-end">
         <button
@@ -204,7 +201,6 @@ const BookingPage: React.FC = () => {
       </div>
     </div>
   );
-    
-}
+};
 
 export default BookingPage;

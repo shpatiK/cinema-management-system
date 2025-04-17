@@ -1,11 +1,11 @@
 import React from 'react';
 import MovieCard from '../components/MovieCard'; 
-import godfather from '../assets/images/godfather.jpg';
-import inception from '../assets/images/inception.jpg';
-import interstellar from '../assets/images/interstellar.jpg';
-import shutterisland from '../assets/images/shutterisland.jpg';
-import darknight from '../assets/images/darknight.jpg';
-import thegreatgatsby from '../assets/images/thegreatgatsby.jpg';
+import godfather from '../../../assets/images/godfather.jpg';
+import inception from '../../../assets/images/inception.jpg';
+import interstellar from '../../../assets/images/interstellar.jpg';
+import shutterisland from '../../../assets/images/shutterisland.jpg';
+import darknight from '../../../assets/images/darknight.jpg';
+import thegreatgatsby from '../../../assets/images/thegreatgatsby.jpg';
 
 const MoviesPage = () => {
   const movies = [

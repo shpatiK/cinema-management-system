@@ -284,13 +284,13 @@ const MovieDetailsPage: React.FC = () => {
         <h3 className="text-2xl font-bold mb-4">Showtimes</h3>
         {movie.showtimes.map((showtime, index) => (
           <div key={index} className="mb-6 p-4 bg-gray-800 rounded-lg">
-            <h4 className="text-xl font-semibold mb-2">{showtime.cinema}</h4>
+            <h4 className="text-xl font-semibold mb-2 text-white">{showtime.cinema}</h4>
             <div className="flex flex-wrap gap-4">
               <div className="bg-gray-700 p-3 rounded-lg min-w-[200px]">
-                <p className="font-bold">{showtime.time}</p>
-                <p>{showtime.hall} • {showtime.type}</p>
+                <p className="font-bold text-white">{showtime.time}</p>
+                <p className="text-white">{showtime.hall} • {showtime.type}</p>
                 <p className="text-yellow-400">{showtime.seats} seats available</p>
-                <p className="text-lg font-semibold my-1">${showtime.price}</p>
+                <p className="text-lg font-semibold my-1 text-white">${showtime.price}</p>
                 <button 
                   onClick={() => handleBuyTickets(showtime)}
                   className="mt-2 w-full bg-yellow-500 text-black px-4 py-1 rounded font-bold hover:bg-yellow-400 transition-colors"
@@ -317,16 +317,16 @@ const MovieDetailsPage: React.FC = () => {
         <h3 className="text-2xl font-bold mb-4">Additional Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 className="font-semibold mb-2">Original Title</h4>
-            <p>{movie.originalTitle}</p>
+          <h4 className="font-semibold mb-2 text-white">Original Title</h4>
+<p className="text-white">{movie.originalTitle}</p>
           </div>
           <div>
-            <h4 className="font-semibold mb-2">Cast</h4>
+          <h4 className="font-semibold mb-2 text-white">Cast</h4>
             <div className="flex flex-wrap gap-2">
               {movie.actors.map((actor, i) => (
-                <span key={i} className="bg-gray-700 px-3 py-1 rounded-full text-sm">
-                  {actor}
-                </span>
+                <span key={i} className="bg-gray-700 px-3 py-1 rounded-full text-sm text-white">
+                {actor}
+              </span>
               ))}
             </div>
           </div>

@@ -1,21 +1,24 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthModalProvider } from './context/AuthModalContext';
-import HomePage from './pages/HomePage';
-import MoviesPage from './pages/MoviesPage';
-import EventsPage from './pages/EventsPage';
-import ClubPage from './pages/ClubPage';
-import RentPage from './pages/RentPage';
-import CinemasPage from './pages/CinemasPage';
-import AuthModal from './components/AuthModal';
-import SearchPage from './pages/SearchPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import ContactUsPage from './pages/ContactUsPage';
-import Footer from './components/Footer'; 
-import MovieDetailsPage from './components/MovieDetailsPage';
-import Header from './components/Header';
-import AdvertisingPage from './pages/AdvertisingPage';
-import BookingPage from './pages/BookingPage';
+import HomePage from './modules/auth/pages/HomePage';
+import MoviesPage from './modules/auth/pages/MoviesPage';
+import EventsPage from './modules/auth/pages/EventsPage';
+import ClubPage from './modules/auth/pages/ClubPage';
+import RentPage from './modules/auth/pages/RentPage';
+import CinemasPage from './modules/auth/pages/CinemasPage';
+import AuthModal from './modules/auth/components/AuthModal';
+import SearchPage from './modules/auth/pages/SearchPage';
+import PrivacyPolicyPage from './modules/auth/pages/PrivacyPolicyPage';
+import ContactUsPage from './modules/auth/pages/ContactUsPage';
+import Footer from './modules/auth/components/Footer'; 
+import MovieDetailsPage from './modules/auth/components/MovieDetailsPage';
+import Header from './modules/auth/components/Header';
+import AdvertisingPage from './modules/auth/pages/AdvertisingPage';
+import BookingPage from './modules/auth/pages/BookingPage';
+
+
+
 
 
 

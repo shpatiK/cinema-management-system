@@ -1,6 +1,6 @@
 import React from 'react';
-import kinemaImage from '../assets/images/kinema.jpg'; // Import your cinema image
-import { useAuthModal } from '../context/AuthModalContext';
+import kinemaImage from '../../../assets/images/kinema.jpg'; // Import your cinema image
+import { useAuthModal } from '../../../context/AuthModalContext';
 
 const RentPage = () => {
   const { openModal } = useAuthModal();
