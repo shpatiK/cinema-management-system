@@ -1,6 +1,6 @@
 import express from 'express';
 import MovieController from '../controllers/MovieController';
-import validateMovie from '../middlewares/validate.middleware';
+import validateMovie from '../../../middlewares/validate.middleware';
 
 const router = express.Router();
 
