@@ -1,12 +1,12 @@
 import express from 'express';
 import sequelize from './db/postgres';
 import { connectMongoDB } from './db/mongo';
-import movieRoutes from './modules/auth/routes/movieRoutes';
-import metadataRoutes from './modules/auth/routes/metadataRoutes';
-import authRoutes from './modules/auth/routes/authRoutes';
-import { authMiddleware } from './modules/auth/utils/auth';
-import User from './modules/auth/models/User';
-import Movie from './modules/auth/models/Movie';
+import movieRoutes from './modules/routes/movieRoutes';
+import metadataRoutes from './modules/routes/metadataRoutes';
+import authRoutes from './modules/routes/authRoutes';
+import { authMiddleware } from './modules/utils/auth';
+import User from './modules/models/User';
+import Movie from './modules/models/Movie';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
 

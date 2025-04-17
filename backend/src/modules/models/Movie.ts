@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import sequelize from '../../../db/postgres';
+import sequelize from '../../db/postgres';
 
 // Movie model definition
 class Movie extends Model {}
