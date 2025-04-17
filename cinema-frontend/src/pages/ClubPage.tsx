@@ -5,6 +5,7 @@ import drinkImg from '../assets/images/drink.png';
 import nachosImg from '../assets/images/nachos.png';
 import ticketImg from '../assets/images/ticket.png';
 import kitkatImg from '../assets/images/kitkat.jpg';
+import bonusCardImg from '../assets/images/bonuscard.jpg'; // Import your bonus card image
 
 const ClubPage = () => {
   const { openModal } = useAuthModal();
@@ -19,17 +20,32 @@ const ClubPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-black text-white py-4 px-6">
-        <h1 className="text-3xl font-bold">INOX CLUB</h1>
+      {/* Header with bonus card */}
+      <div className="bg-black text-white py-4 px-6 relative">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <h1 className="text-3xl font-bold">INOX CLUB</h1>
+          <img 
+            src={bonusCardImg} 
+            alt="Bonus Card" 
+            className="h-16 w-auto object-contain absolute right-6 top-1/2 transform -translate-y-1/2" 
+          />
+        </div>
       </div>
 
-      {/* Hero Section */}
-      <div className="bg-yellow-600 text-white py-12 px-4 text-center">
-        <h2 className="text-4xl font-bold mb-4">JOIN OUR CLUB!</h2>
-        <p className="text-xl max-w-2xl mx-auto">
-          Earn points with every purchase and enjoy exclusive member benefits
-        </p>
+      {/* Hero Section with centered text */}
+      <div className="bg-yellow-600 text-white py-12 px-4 text-center relative">
+        {/* Bonus card image - hidden on mobile, shown on md+ screens */}
+        <img 
+          src={bonusCardImg} 
+          alt="Bonus Card" 
+          className="hidden md:block h-32 w-auto absolute right-8 top-1/2 transform -translate-y-1/2" 
+        />
+        <div className="max-w-2xl mx-auto relative z-10">
+          <h2 className="text-4xl font-bold mb-4">JOIN OUR CLUB!</h2>
+          <p className="text-xl">
+            Earn points with every purchase and enjoy exclusive member benefits
+          </p>
+        </div>
       </div>
 
       {/* Main Content */}

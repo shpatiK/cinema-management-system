@@ -3,17 +3,17 @@ import React from 'react';
 const CinemasPage = () => {
   const cinemas = [
     {
-      name: "CINEPLEXX PRIZREN",
+      name: "INOX PRIZREN",
       location: "Qendra Tregtare Galeria, Prizren",
       features: ["4K projection", "Dolby Atmos", "VIP lounges"]
     },
     {
-      name: "CINEPLEXX ALBI MALL",
+      name: "INOX ALBI MALL",
       location: "Zona e re Industria",
       features: ["7 screening rooms", "3D capability", "Wheelchair accessible"]
     },
     {
-      name: "CINEPLEXX PRISHTINA MALL",
+      name: "INOX PRISHTINA MALL",
       location: "M2 (Prishtinë - Ferizaj)",
       features: ["Largest screen in Kosovo", "4DX experience", "Food service"]
     }

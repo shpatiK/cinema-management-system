@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Make sure this import exists
 import { FaFacebook, FaInstagram, FaTiktok } from 'react-icons/fa';
 import { FaLocationDot } from 'react-icons/fa6';
 
@@ -17,16 +17,14 @@ const Footer = () => {
               <FaLocationDot className="text-yellow-500 mr-2" />
               <span>Prishtina & Prizren </span>
             </div>
-           
           </div>
 
           {/* Column 2 - Movies */}
           <div>
             <h4 className="font-bold mb-4">MOVIES</h4>
             <ul className="space-y-2">
-              <li>Top Movies</li>
-              <li>Coming Soon</li>
-              <li>Premieres</li>
+              <li><Link to="/events" className="hover:text-yellow-400 transition-colors">Events</Link></li>
+              <li><Link to="/movies" className="hover:text-yellow-400 transition-colors">Top movies</Link></li>
             </ul>
           </div>
 
@@ -34,7 +32,7 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-4">INFORMATION</h4>
             <ul className="space-y-2">
-              <li>Cinema Club</li>
+              <li><Link to="/club" className="hover:text-yellow-400 transition-colors">Cinema Club</Link></li>
             </ul>
           </div>
 
@@ -42,8 +40,15 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-4">B2B</h4>
             <ul className="space-y-2">
-              <li>Rent a hall</li>
-              <li>Advertise in our cinemas</li>
+              <li><Link to="/rent" className="hover:text-yellow-400 transition-colors">Rent a hall</Link></li>
+              <li>
+               <Link 
+            to="/advertising" 
+          className="hover:text-yellow-400 transition-colors"
+              >
+              Advertise in our cinemas
+            </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -61,16 +66,14 @@ const Footer = () => {
               <FaTiktok size={24} />
             </a>
           </div>
-          
-          
         </div>
 
         {/* Copyright Section */}
         <div className="mt-8 text-center text-gray-400 text-sm">
           <p>© INOX Kosovo LLC</p>
           <div className="flex justify-center space-x-4 mt-2">
-          <Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link>
-          <Link to="/contact-us" className="hover:text-white">Contact Us</Link>
+            <Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link>
+            <Link to="/contact-us" className="hover:text-white">Contact Us</Link>
           </div>
         </div>
       </div>

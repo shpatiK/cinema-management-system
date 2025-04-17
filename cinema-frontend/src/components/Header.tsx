@@ -1,39 +1,60 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuthModal } from '../context/AuthModalContext';
+import SearchBar from './SearchBar';
+import inoxLogo from '../assets/images/logo.png'; 
 
 const Header = () => {
+  const { openModal } = useAuthModal();
+  
   const navItems = [
     { text: "MOVIES", path: "/movies" },
-    { text: "BOOK", path: "/booking" },
     { text: "EVENTS", path: "/events" },
     { text: "CINEMAS", path: "/cinema" },
     { text: "CLUB", path: "/club" },
-    { text: "RENT A HALL", path: "/rent" }
+    { text: "RENT A HALL", path: "/rent" },
   ];
 
   return (
-    // Header.tsx
-<header className="bg-gray-900/90 backdrop-blur-md sticky top-0 z-50">
-  <div className="container mx-auto px-6 py-4">
-    <div className="flex justify-between items-center">
-      <h1 className="text-2xl font-bold text-yellow-400">INOX</h1>
-      <nav className="hidden md:flex space-x-8">
-        {navItems.map((item) => (
+    <header className="bg-blue-900 text-white py-4 text-center"> 
+    <Link to="/" className="inline-block">
+      <img 
+        src={inoxLogo} 
+        alt="INOX Logo" 
+        className="h-20 mx-auto hover:opacity-90 transition-opacity" 
+        
+      />
+    </Link>
+    
+    <div className="flex justify-center items-center flex-wrap gap-4 mt-2"> 
+      {navItems.map((item, index) => (
+        <React.Fragment key={item.path}>
           <Link 
-            key={item.path}
-            to={item.path}
-            className="text-white hover:text-yellow-400 transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-yellow-400 after:transition-all hover:after:w-full"
+            to={item.path} 
+            className="text-xl font-medium uppercase hover:text-yellow-300 transition-colors" 
           >
             {item.text}
           </Link>
-        ))}
-      </nav>
-      <button className="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded-full text-black font-bold transition-colors">
+        
+          {index < navItems.length - 1 && (
+            <span className="text-xl">|</span> 
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+    
+    <div className="flex justify-center items-center gap-6 mt-4"> 
+      <div className="relative w-1/3">
+        <SearchBar /> 
+      </div>
+      <button 
+        onClick={openModal}
+        className="bg-yellow-400 text-blue-900 px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition-colors text-sm" // Slightly smaller text
+      >
         Login
       </button>
     </div>
-  </div>
-</header>
+  </header>
   );
 };
 
