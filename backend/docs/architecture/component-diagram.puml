@@ -1,0 +1,6 @@
+@startuml
+[React Frontend] --> [Express API]
+[Express API] --> [PostgreSQL]
+[Express API] --> [MongoDB]
+[Express API] --> [Redis Cache]
+@enduml
