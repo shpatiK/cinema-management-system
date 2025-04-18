@@ -5,19 +5,26 @@ const CinemasPage = () => {
     {
       name: "INOX PRIZREN",
       location: "Qendra Tregtare Galeria, Prizren",
-      features: ["4K projection", "Dolby Atmos", "VIP lounges"]
+      features: ["4K projection", "Dolby Atmos", "VIP lounges"],
+      mapsLink: "https://maps.google.com/?q=Galeria+Shopping+Mall+Prizren"
     },
     {
       name: "INOX ALBI MALL",
       location: "Zona e re Industria",
-      features: ["7 screening rooms", "3D capability", "Wheelchair accessible"]
+      features: ["7 screening rooms", "3D capability", "Wheelchair accessible"],
+      mapsLink: "https://maps.google.com/?q=Albi+Mall+Prishtina"
     },
     {
       name: "INOX PRISHTINA MALL",
       location: "M2 (Prishtinë - Ferizaj)",
-      features: ["Largest screen in Kosovo", "4DX experience", "Food service"]
+      features: ["Largest screen in Kosovo", "4DX experience", "Food service"],
+      mapsLink: "https://maps.google.com/?q=Prishtina+Mall"
     }
   ];
+
+  const openGoogleMaps = (url: string | URL | undefined) => {
+    window.open(url, '_blank');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -55,8 +62,11 @@ const CinemasPage = () => {
                     </li>
                   ))}
                 </ul>
-                <button className="mt-6 w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition">
-                  View Details
+                <button 
+                  onClick={() => openGoogleMaps(cinema.mapsLink)}
+                  className="mt-6 w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
+                >
+                  View Location
                 </button>
               </div>
             </div>

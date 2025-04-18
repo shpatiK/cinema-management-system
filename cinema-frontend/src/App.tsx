@@ -16,11 +16,7 @@ import MovieDetailsPage from './modules/auth/components/MovieDetailsPage';
 import Header from './modules/auth/components/Header';
 import AdvertisingPage from './modules/auth/pages/AdvertisingPage';
 import BookingPage from './modules/auth/pages/BookingPage';
-
-
-
-
-
+import { ModalProvider } from './context/ModalContext';
 
 // Add this ScrollToTop component
 const ScrollToTop = () => {
@@ -39,34 +35,35 @@ const ScrollToTop = () => {
 function App() {
   return (
     <AuthModalProvider>
-      <Router>
-        {/* Add ScrollToTop right inside Router */}
-        <ScrollToTop />
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          
-          <main className="flex-grow container mx-auto p-4">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/movies" element={<MoviesPage />} />
-              <Route path="/events" element={<EventsPage />} />
-              <Route path="/cinema" element={<CinemasPage />} />
-              <Route path="/club" element={<ClubPage />} />
-              <Route path="/rent" element={<RentPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-              <Route path="/contact-us" element={<ContactUsPage />} />
-              <Route path="/movies/:id" element={<MovieDetailsPage />} />
-              <Route path="/advertising" element={<AdvertisingPage />} />
-              <Route path="/booking/:id" element={<BookingPage />} />
+      <ModalProvider>
+        <Router>
+          {/* Add ScrollToTop right inside Router */}
+          <ScrollToTop />
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            
+            <main className="flex-grow container mx-auto p-4">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/movies" element={<MoviesPage />} />
+                <Route path="/events" element={<EventsPage />} />
+                <Route path="/cinema" element={<CinemasPage />} />
+                <Route path="/club" element={<ClubPage />} />
+                <Route path="/rent" element={<RentPage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route path="/contact-us" element={<ContactUsPage />} />
+                <Route path="/movies/:id" element={<MovieDetailsPage />} />
+                <Route path="/advertising" element={<AdvertisingPage />} />
+                <Route path="/booking/:id" element={<BookingPage />} />
+              </Routes>
+            </main>
 
-            </Routes>
-          </main>
-
-          <Footer />
-          <AuthModal />
-        </div>
-      </Router>
+            <Footer />
+            <AuthModal />
+          </div>
+        </Router>
+      </ModalProvider>
     </AuthModalProvider>
   );
 }

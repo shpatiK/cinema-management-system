@@ -66,7 +66,7 @@ const AdvertisingPage = () => {
               type="submit" 
               className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-6 rounded-full transition-colors"
             >
-              Request Information
+              Submit
             </button>
           </form>
         </div>

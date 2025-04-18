@@ -1,12 +1,20 @@
-import React from 'react';
-import kinemaImage from '../../../assets/images/kinema.jpg'; // Import your cinema image
-import { useAuthModal } from '../../../context/AuthModalContext';
+// src/pages/RentPage.js
+import React, { useState } from 'react';
+import kinemaImage from '../../../assets/images/kinema.jpg';
+import ContactForm from '../components/ContactForm';
 
 const RentPage = () => {
-  const { openModal } = useAuthModal();
+  const [showContactModal, setShowContactModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Modal Overlay */}
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <ContactForm onClose={() => setShowContactModal(false)} />
+        </div>
+      )}
+
       {/* Hero Section with Cinema Image */}
       <div className="relative h-96 w-full overflow-hidden">
         <img 
@@ -56,7 +64,7 @@ const RentPage = () => {
           <div className="mt-12 text-center">
             <h3 className="text-2xl font-bold mb-6">Ready to book your private screening?</h3>
             <button
-              onClick={openModal}
+              onClick={() => setShowContactModal(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
             >
               Contact Us

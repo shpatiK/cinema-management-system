@@ -145,8 +145,8 @@ const MovieDetailsPage: React.FC = () => {
       {/* Seat Selection Modal */}
       {showSeatSelection && selectedShowtime && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
+<div className="bg-blue-100 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+<div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Select Seats for {movie.title}</h2>
               <button 
                 onClick={() => setShowSeatSelection(false)}
@@ -222,7 +222,7 @@ const MovieDetailsPage: React.FC = () => {
             </div>
 
             {/* Selection summary */}
-            <div className="bg-gray-800 p-4 rounded-lg mb-6">
+            <div className="bg-white p-4 rounded-lg mb-6">
               <h3 className="font-bold mb-2">Your Selection</h3>
               {selectedSeats.length > 0 ? (
                 <div>
@@ -314,7 +314,7 @@ const MovieDetailsPage: React.FC = () => {
 
       {/* Additional Info */}
       <div className="bg-gray-800 p-6 rounded-lg">
-        <h3 className="text-2xl font-bold mb-4">Additional Information</h3>
+      <h3 className="text-2xl font-bold mb-4 text-white">Additional Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
           <h4 className="font-semibold mb-2 text-white">Original Title</h4>
