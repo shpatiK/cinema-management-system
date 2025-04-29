@@ -1,11 +1,11 @@
 import React from 'react';
-import { useAuthModal } from '../../../context/AuthModalContext';
-import popcornImg from '../../../assets/images/popcorn.jpg';
-import drinkImg from '../../../assets/images/drink.png';
-import nachosImg from '../../../assets/images/nachos.png';
-import ticketImg from '../../../assets/images/ticket.png';
-import kitkatImg from '../../../assets/images/kitkat.jpg';
-import bonusCardImg from '../../../assets/images/bonuscard.jpg'; // Import your bonus card image
+import { useAuthModal } from '../context/AuthModalContext';
+import popcornImg from '../assets/images/popcorn.jpg';
+import drinkImg from '../assets/images/drink.png';
+import nachosImg from '../assets/images/nachos.png';
+import ticketImg from '../assets/images/ticket.png';
+import kitkatImg from '../assets/images/kitkat.jpg';
+import bonusCardImg from '../assets/images/bonuscard.jpg'; // Import your bonus card image
 
 const ClubPage = () => {
   const { openModal } = useAuthModal();

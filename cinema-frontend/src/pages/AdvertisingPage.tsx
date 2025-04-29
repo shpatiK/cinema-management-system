@@ -1,4 +1,3 @@
-// src/pages/AdvertisingPage.tsx
 import React from 'react';
 
 const AdvertisingPage = () => {

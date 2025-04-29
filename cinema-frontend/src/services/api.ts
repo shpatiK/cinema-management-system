@@ -1,21 +1,26 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:3000'; 
+
+
 
 export const fetchMovies = async () => {
-  const response = await axios.get(`${API_URL}/movies`);
-  return response.data;
+  try {
+    const response = await axios.get(`${API_BASE_URL}/movies`, {
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching movies:', error);
+    throw error;
+  }
 };
 
-export const bookTicket = async (ticketData: any) => {
-  const response = await axios.post(`${API_URL}/booking`, ticketData);
-  return response.data;
+export type Movie = {
+  id: number;
+  title: string;
+  duration: number;
+  release_year: number;
+  poster_url: string;
 };
 
-// import axios from "axios";
-// import { Movie } from "../types/movie";
 
-// export const getMovies = async (): Promise<Movie[]> => {
-//   const response = await axios.get("http://localhost:5000/api/movies");
-//   return response.data;
-// };

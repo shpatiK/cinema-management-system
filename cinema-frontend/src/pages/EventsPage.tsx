@@ -1,6 +1,6 @@
 import React from 'react';
-import dokufestLogo from '../../../assets/images/dokufest.jpg';
-import prifestLogo from '../../../assets/images/prifest.jpg';
+import dokufestLogo from '../assets/images/dokufest.jpg';
+import prifestLogo from '../assets/images/prifest.jpg';
 
 const EventsPage = () => {
   return (

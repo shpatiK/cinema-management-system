@@ -3,10 +3,13 @@ import { useLocation } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
 
 interface Movie {
-  id: number;  // Changed from string to number to match MovieCardProps
+  id: number;
   title: string;
-  year: number;
-  image: string;
+  year: number;          // From API
+  image: string;         // From API
+  duration: number;     // Optional for MovieCard
+  rating?: number;       // Optional for MovieCard
+  genre?: string;        // Optional for MovieCard
 }
 
 const SearchPage = () => {
@@ -61,12 +64,15 @@ const SearchPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {results.map((movie) => (
-            <MovieCard 
+            <MovieCard
               key={movie.id}
               id={movie.id}
               title={movie.title}
-              year={movie.year}
-              image={movie.image}
+              release_year={movie.year}     // Map year → release_year
+              poster_url={movie.image}      // Map image → poster_url
+              duration={movie.duration}     // Optional
+              rating={movie.rating}         // Optional
+              genre={movie.genre}           // Optional
             />
           ))}
         </div>

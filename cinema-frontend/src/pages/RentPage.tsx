@@ -1,6 +1,6 @@
 // src/pages/RentPage.js
 import React, { useState } from 'react';
-import kinemaImage from '../../../assets/images/kinema.jpg';
+import kinemaImage from '../assets/images/kinema.jpg';
 import ContactForm from '../components/ContactForm';
 
 const RentPage = () => {
