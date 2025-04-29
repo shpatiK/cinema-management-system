@@ -1,40 +1,38 @@
 import express from 'express';
 import sequelize from './db/postgres';
-import { connectMongoDB } from './db/mongo';
 import movieRoutes from './modules/routes/movieRoutes';
-import metadataRoutes from './modules/routes/metadataRoutes';
 import authRoutes from './modules/routes/authRoutes';
 import { authMiddleware } from './modules/utils/auth';
 import User from './modules/models/User';
 import Movie from './modules/models/Movie';
 import cors from 'cors';
-import fileUpload from 'express-fileupload';
+import path from 'path';
+
 
 const app = express();
 const PORT = 3000;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
-app.use(fileUpload());
-app.use('/posters', express.static('public/posters'));
+app.use(cors({
+  origin: 'http://localhost:3001' // Your frontend URL
+}));
+app.use('/posters', express.static(path.join(__dirname, '../public/posters')));
 
+console.log('Static files served from:', path.join(__dirname, '../public/posters'));
 // Database initialization
 async function initializeDatabase() {
   try {
     await sequelize.authenticate();
     await sequelize.sync({ alter: true }); // Note: Use migrations in production
     console.log('✅ Database connected and tables synced!');
-
-    // Initialize MongoDB
-    await connectMongoDB();
     
     // Optional: Create admin user if doesn't exist
     await User.findOrCreate({
       where: { username: 'admin' },
       defaults: {
         username: 'admin',
-        password: 'admin123' 
+        password: 'admin123' // Change this in production!
       }
     });
   } catch (error) {
@@ -50,13 +48,10 @@ app.get('/', (req, res) => {
 
 // Unprotected routes
 app.use('/auth', authRoutes);
+app.use('/movies', movieRoutes);
 
 // Protected routes (require JWT)
 app.use('/movies', authMiddleware, movieRoutes);
-
-// Protected routes
-app.use('/movies', authMiddleware, movieRoutes);       // PostgreSQL (with validation)
-app.use('/metadata', authMiddleware, metadataRoutes);    // MongoDB (no validation)
 
 // Error handling middleware (must be last)
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -71,8 +66,6 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 initializeDatabase().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`- PostgreSQL: Movies/Core Data`);
-    console.log(`- MongoDB: Metadata/Unstructured Data`);
   });
 });
 

@@ -1,37 +1,68 @@
 import { Request, Response } from 'express';
 import Movie from '../models/Movie';
-import path from 'path';
-import fs from 'fs';
-
 
 export default class MovieController {
-  // GET all movies
+  // GET all movies 
   static getAllMovies = async (req: Request, res: Response): Promise<void> => {
     try {
-      const movies = await Movie.findAll({
-        attributes: ['id', 'title', 'duration', 'poster_url', 'release_year'] // Explicitly include new fields
-      });
+      const movies = await Movie.findAll();
       res.json(movies);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch movies' });
     }
   };
 
-  // POST new movie
+  // POST new movie 
   static createMovie = async (req: Request, res: Response): Promise<void> => {
     try {
-  const movie = await Movie.create(req.body);
+      // Validate required fields
+      const { title, duration, release_year, poster_url } = req.body;
+      
+      if (!title || !duration || !release_year || !poster_url) {
+        res.status(400).json({ 
+          error: 'Missing required fields',
+          required: ['title', 'duration', 'release_year', 'poster_url']
+        });
+        return;
+      }
+
+      // Additional validation
+      if (isNaN(release_year)) {
+        res.status(400).json({ error: 'Release year must be a number' });
+        return;
+      }
+
+      const movie = await Movie.create({
+        title,
+        duration,
+        release_year: parseInt(release_year),
+        poster_url
+      });
+      
       res.status(201).json(movie);
     } catch (error) {
-      res.status(400).json({ error: 'Invalid movie data' });
+      res.status(400).json({ 
+        error: 'Invalid movie data',
+        details: error.errors?.map((err: any) => err.message) || error.message
+      });
     }
   };
 
-  // PUT update movie
+  // PUT update movie 
   static updateMovie = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const [affectedCount] = await Movie.update(req.body, { where: { id } });
+      const { release_year, ...rest } = req.body;
+
+      // Convert release_year to number if provided
+      const updateData = release_year 
+        ? { ...rest, release_year: parseInt(release_year) }
+        : rest;
+
+      const [affectedCount] = await Movie.update(updateData, { 
+        where: { id },
+        validate: true // Ensure validations run on update
+      });
       
       if (affectedCount > 0) {
         const updatedMovie = await Movie.findByPk(id);
@@ -40,11 +71,14 @@ export default class MovieController {
         res.status(404).json({ error: 'Movie not found' });
       }
     } catch (error) {
-      res.status(500).json({ error: 'Update failed' });
+      res.status(400).json({ 
+        error: 'Update failed',
+        details: error.errors?.map((err: any) => err.message) || error.message
+      });
     }
   };
 
-  // DELETE movie
+  // DELETE movie 
   static deleteMovie = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
