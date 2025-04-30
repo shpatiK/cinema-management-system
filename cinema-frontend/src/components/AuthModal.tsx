@@ -1,49 +1,43 @@
 import React, { useState } from 'react';
 import { useAuthModal } from '../context/AuthModalContext';
+import { login, register } from '../services/api'; // <-- Make sure this path is correct
 
 type AuthMode = 'login' | 'register';
 
 interface AuthFormData {
-  email: string;
+  username: string;
   password: string;
-  name: string;
 }
 
 const AuthModal: React.FC = () => {
   const { isOpen, closeModal } = useAuthModal();
   const [mode, setMode] = useState<AuthMode>('login');
   const [formData, setFormData] = useState<AuthFormData>({
-    email: '',
+    username: '',
     password: '',
-    name: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    
+    setSuccess(null);
+
     try {
-      const endpoint = mode === 'login' ? '/api/login' : '/api/register';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mode === 'login' ? 
-          { email: formData.email, password: formData.password } :
-          formData
-        )
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Authentication failed');
-
-      localStorage.setItem('token', data.token);
-      closeModal();
-      window.location.reload();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authentication failed');
+      if (mode === 'login') {
+        const data = await login(formData.username, formData.password);
+        localStorage.setItem('token', data.token);
+        closeModal();
+        window.location.reload(); // optional: or navigate to /dashboard etc.
+      } else {
+        await register(formData.username, formData.password);
+        setSuccess('Check your email to activate your account.');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Authentication failed');
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +46,7 @@ const AuthModal: React.FC = () => {
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       onClick={(e) => e.target === e.currentTarget && closeModal()}
     >
@@ -61,51 +55,44 @@ const AuthModal: React.FC = () => {
           <h2 className="text-2xl font-bold">
             {mode === 'login' ? 'Login' : 'Register'}
           </h2>
-          <button 
+          <button
             onClick={closeModal}
             className="text-gray-500 hover:text-gray-700"
           >
             ✕
           </button>
         </div>
-        
+
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4">
             {error}
           </div>
         )}
 
+        {success && (
+          <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4">
+            {success}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === 'register' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-          )}
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+              Username
             </label>
             <input
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              type="text"
+              placeholder="Username"
+              value={formData.username}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
               className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Password
@@ -114,36 +101,37 @@ const AuthModal: React.FC = () => {
               type="password"
               placeholder="Password"
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
               className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
               minLength={6}
             />
           </div>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             disabled={isLoading}
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-400 flex justify-center items-center"
           >
-            {isLoading ? (
-              <span className="animate-spin mr-2">↻</span>
-            ) : null}
+            {isLoading ? <span className="animate-spin mr-2">↻</span> : null}
             {mode === 'login' ? 'Login' : 'Register'}
           </button>
         </form>
 
         <div className="mt-4 text-center">
-          <button 
+          <button
             onClick={() => {
               setMode(mode === 'login' ? 'register' : 'login');
               setError(null);
+              setSuccess(null);
             }}
             className="text-blue-600 hover:underline text-sm"
           >
-            {mode === 'login' 
-              ? "Don't have an account? Register" 
-              : "Already have an account? Login"}
+            {mode === 'login'
+              ? "Don't have an account? Register"
+              : 'Already have an account? Login'}
           </button>
         </div>
       </div>

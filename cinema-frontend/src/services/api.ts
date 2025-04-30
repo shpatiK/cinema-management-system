@@ -23,4 +23,20 @@ export type Movie = {
   poster_url: string;
 };
 
+export const login = async (username: string, password: string) => {
+  const response = await axios.post(`http://localhost:3000/auth/login`, {
+    username,
+    password,
+  });
+  return response.data; // should include { token }
+};
+
+export const register = async (username: string, password: string) => {
+  const response = await axios.post(`http://localhost:3000/auth/register`, {
+    username,
+    password,
+  });
+  return response.data;
+};
+
 
