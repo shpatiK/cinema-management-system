@@ -5,9 +5,9 @@ const JWT_SECRET = 'your-very-secure-secret';
 const EXPIRES_IN = '1h'; // Token expiration time
 
 // Token generation
-export const generateToken = (userId: number): string => {
-  return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: EXPIRES_IN });
-};
+export function generateToken(userId: number, role: string): string {
+  return jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '1h' });
+}
 
 // Token verification
 export const verifyToken = (token: string): jwt.JwtPayload => {
@@ -34,4 +34,14 @@ export const authMiddleware = (
   } catch (error) {
     res.status(401).json({ error: 'Invalid token.' });
   }
+};
+
+//  Role-checking middleware
+export const checkRole = (role: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if ((req as any).user?.role !== role) {
+      return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
+    }
+    next();
+  };
 };

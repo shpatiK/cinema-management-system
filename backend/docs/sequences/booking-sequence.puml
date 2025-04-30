@@ -1,0 +1,13 @@
+@startuml
+actor User
+participant Frontend
+participant API
+database PostgreSQL
+
+User -> Frontend: Select movie
+Frontend -> API: POST /bookings
+API -> PostgreSQL: BEGIN TRANSACTION
+PostgreSQL -> API: Reserve seats
+API -> PostgreSQL: Create booking
+API -> User: Confirmation
+@enduml

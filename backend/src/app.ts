@@ -1,17 +1,25 @@
 import express from 'express';
 import sequelize from './db/postgres';
-import movieRoutes from './routes/movieRoutes';
-import authRoutes from './routes/authRoutes';
-import { authMiddleware } from './utils/auth';
-import User from './models/User';
-import Movie from './models/Movie';
+import movieRoutes from './modules/routes/movieRoutes';
+import authRoutes from './modules/routes/authRoutes';
+import { authMiddleware } from './modules/utils/auth';
+import User from './modules/models/User';
+import Movie from './modules/models/Movie';
+import cors from 'cors';
+import path from 'path';
+
 
 const app = express();
 const PORT = 3000;
 
 // Middleware
 app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:3001' // Your frontend URL
+}));
+app.use('/posters', express.static(path.join(__dirname, '../public/posters')));
 
+console.log('Static files served from:', path.join(__dirname, '../public/posters'));
 // Database initialization
 async function initializeDatabase() {
   try {
@@ -40,6 +48,7 @@ app.get('/', (req, res) => {
 
 // Unprotected routes
 app.use('/auth', authRoutes);
+app.use('/movies', movieRoutes);
 
 // Protected routes (require JWT)
 app.use('/movies', authMiddleware, movieRoutes);

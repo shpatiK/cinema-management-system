@@ -1,0 +1,19 @@
+@startuml
+!include <awslib/AWSCommon>
+!include <awslib/Compute/all>
+!include <awslib/Database/all>
+
+cloud "AWS EC2" {
+  component "Nginx" as web
+  component "Node.js" as app
+  database "PostgreSQL" as db
+}
+
+cloud "MongoDB Atlas" {
+  database "MongoDB Replica Set" as mongo
+}
+
+web --> app
+app --> db
+app --> mongo
+@enduml

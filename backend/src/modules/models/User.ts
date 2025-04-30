@@ -1,11 +1,14 @@
 import { Model, DataTypes } from 'sequelize';
-import sequelize from '../db/postgres';
+import sequelize from '../../db/postgres';
 import bcrypt from 'bcryptjs';
 
 class User extends Model {
   public id!: number;
   public username!: string;
   public password!: string;
+  public role!: string;
+  public isActive!: boolean;
+  public activationToken!: string | null;
 
   public async comparePassword(candidatePassword: string): Promise<boolean> {
     return bcrypt.compare(candidatePassword, this.password);
@@ -25,6 +28,19 @@ User.init({
       const hash = bcrypt.hashSync(value, 10);
       this.setDataValue('password', hash);
     }
+  },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: 'ROLE_USER',
+    allowNull: false
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  activationToken: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, { sequelize, modelName: 'user' });
 
