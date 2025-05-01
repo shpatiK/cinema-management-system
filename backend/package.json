@@ -20,12 +20,14 @@
   },
   "homepage": "https://github.com/shpatiK/cinema-management-system#readme",
   "devDependencies": {
+    "@types/amqplib": "^0.10.7",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/mongoose": "^5.11.96",
     "@types/node": "^22.15.3",
     "@types/nodemailer": "^6.4.17",
+    "@types/redis": "^4.0.10",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "nodemon": "^3.1.9",
@@ -35,6 +37,7 @@
   },
   "dependencies": {
     "@types/sequelize": "^4.28.20",
+    "amqplib": "^0.10.7",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -47,6 +50,7 @@
     "nodemailer": "^6.10.1",
     "pg": "^8.14.1",
     "pg-hstore": "^2.3.4",
+    "redis": "^5.0.0",
     "sequelize": "^6.37.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3"

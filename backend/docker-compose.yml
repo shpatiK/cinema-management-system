@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"       # Port për komunikim me aplikacione
+      - "15672:15672"     # Port për UI të RabbitMQ
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+
+  redis:
+    image: redis:latest
+    container_name: redis-server
+    ports:
+      - "6379:6379"   # Port për lidhje me aplikacionin
+    volumes:
+      - redis-data:/data  # Përshtatimi i ruajtjes së të dhënave të Redis
+    networks:
+      - backend-network
+
+  backend:
+    build: .
+    container_name: cinema-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    depends_on:
+      - rabbitmq
+      - redis    # Backend duhet të presë edhe Redis
+    environment:
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+      REDIS_URL: redis://redis:6379   # Lidhja me Redis
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local
