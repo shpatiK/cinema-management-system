@@ -7,10 +7,26 @@ import User from './modules/models/User';
 import Movie from './modules/models/Movie';
 import cors from 'cors';
 import path from 'path';
-
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
+import { options } from './modules/swagger/swaggerConfig';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+// Swagger setup
+const specs = swaggerJsdoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Middleware
 app.use(express.json());
@@ -19,7 +35,6 @@ app.use(cors({
 }));
 app.use('/posters', express.static(path.join(__dirname, '../public/posters')));
 
-console.log('Static files served from:', path.join(__dirname, '../public/posters'));
 // Database initialization
 async function initializeDatabase() {
   try {
@@ -27,12 +42,23 @@ async function initializeDatabase() {
     await sequelize.sync({ alter: true }); // Note: Use migrations in production
     console.log('✅ Database connected and tables synced!');
     
-    // Optional: Create admin user if doesn't exist
+    // Create admin user if doesn't exist
     await User.findOrCreate({
       where: { username: 'admin' },
       defaults: {
         username: 'admin',
         password: 'admin123' // Change this in production!
+      }
+    });
+
+    // Create sample movie if none exists
+    await Movie.findOrCreate({
+      where: { title: 'Inception' },
+      defaults: {
+        title: 'Inception',
+        duration: 148,
+        poster_url: '/posters/inception.jpg',
+        release_year: 2010
       }
     });
   } catch (error) {
@@ -41,19 +67,30 @@ async function initializeDatabase() {
   }
 }
 
-// Routes
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Check server status
+ *     responses:
+ *       200:
+ *         description: Server is running
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: "🎬 Cinema Management System Backend is Running!"
+ */
 app.get('/', (req, res) => {
   res.send('🎬 Cinema Management System Backend is Running!');
 });
 
-// Unprotected routes
+// Routes
 app.use('/auth', authRoutes);
 app.use('/movies', movieRoutes);
+app.use('/movies', authMiddleware, movieRoutes); // Protected routes
 
-// Protected routes (require JWT)
-app.use('/movies', authMiddleware, movieRoutes);
-
-// Error handling middleware (must be last)
+// Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ 
@@ -66,6 +103,7 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 initializeDatabase().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`API documentation available at http://localhost:${PORT}/api-docs`);
   });
 });
 
