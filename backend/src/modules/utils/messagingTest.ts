@@ -8,7 +8,7 @@ consumeMessages(queueName, (msg) => {
   console.log('✅ Mesazh i pranuar nga queue:', msg);
 });
 
-// Dërgo një mesazh pas 1 sekonde (që të sigurohemi që consumer është gati)
+
 setTimeout(() => {
   publishMessage(queueName, {
     title: 'Interstellar',

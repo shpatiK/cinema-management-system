@@ -1,19 +1,36 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  service: 'Gmail',
+  host: "sandbox.smtp.mailtrap.io",
+  port: 2525,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+    user: "ef4a3d09db579a", // From Mailtrap dashboard
+    pass: "a0dfbdd288700f"  // From Mailtrap dashboard
+  }
 });
 
 export const sendActivationEmail = (email: string, token: string) => {
+  const activationLink = `http://localhost:3001/activate?token=${token}`;
+  console.log('Attempting to send to:', email);
+  
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: process.env.EMAIL_FROM,
     to: email,
     subject: 'Activate Your Cinema Account',
-    html: `<a href="http://localhost:3001/register?token=${token}">Click here to activate</a>`,
+    html: `
+      <div>
+        <h2>Welcome to Cinema Management System!</h2>
+        <p>Please click the link below to activate your account:</p>
+        <a href="${activationLink}">Activate Account</a>
+        <p>Or copy this link to your browser: ${activationLink}</p>
+        <p>This link will expire in 24 hours.</p>
+      </div>
+    `,
   };
-  return transporter.sendMail(mailOptions);
+  return transporter.sendMail(mailOptions)
+    .then(info => console.log('Email sent:', info.response))
+    .catch(err => {
+      console.error('Email error:', err);
+      throw err; 
+    });
 };

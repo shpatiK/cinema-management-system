@@ -10,6 +10,7 @@ import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { options } from './modules/swagger/swaggerConfig';
+import expressStatusMonitor from 'express-status-monitor';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,6 +35,8 @@ app.use(cors({
   origin: 'http://localhost:3001' // Your frontend URL
 }));
 app.use('/posters', express.static(path.join(__dirname, '../public/posters')));
+app.use(expressStatusMonitor());
+
 
 // Database initialization
 async function initializeDatabase() {
