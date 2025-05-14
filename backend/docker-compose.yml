@@ -5,8 +5,8 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"       # Port për komunikim me aplikacione
-      - "15672:15672"     # Port për UI të RabbitMQ
+      - "5672:5672"       
+      - "15672:15672"     
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
@@ -15,9 +15,9 @@ services:
     image: redis:latest
     container_name: redis-server
     ports:
-      - "6379:6379"   # Port për lidhje me aplikacionin
+      - "6379:6379"   
     volumes:
-      - redis-data:/data  # Përshtatimi i ruajtjes së të dhënave të Redis
+      - redis-data:/data  
     networks:
       - backend-network
 
@@ -30,10 +30,10 @@ services:
       - .:/app
     depends_on:
       - rabbitmq
-      - redis    # Backend duhet të presë edhe Redis
+      - redis    
     environment:
       RABBITMQ_URL: amqp://user:password@rabbitmq:5672
-      REDIS_URL: redis://redis:6379   # Lidhja me Redis
+      REDIS_URL: redis://redis:6379   
     networks:
       - backend-network
 

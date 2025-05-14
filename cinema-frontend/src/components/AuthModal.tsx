@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useAuthModal } from '../context/AuthModalContext';
-import { login, register } from '../services/api'; // <-- Make sure this path is correct
+import { login, register } from '../services/api';
 
 type AuthMode = 'login' | 'register';
 
 interface AuthFormData {
   username: string;
+  email?: string;
   password: string;
 }
 
@@ -14,6 +15,7 @@ const AuthModal: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [formData, setFormData] = useState<AuthFormData>({
     username: '',
+    email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -31,13 +33,14 @@ const AuthModal: React.FC = () => {
         const data = await login(formData.username, formData.password);
         localStorage.setItem('token', data.token);
         closeModal();
-        window.location.reload(); // optional: or navigate to /dashboard etc.
+        window.location.reload();
       } else {
-        await register(formData.username, formData.password);
+        if (!formData.email) throw new Error('Email is required');
+        await register(formData.username, formData.password, formData.email);
         setSuccess('Check your email to activate your account.');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Authentication failed');
+      setError(err.response?.data?.error || err.message || 'Authentication failed');
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +79,6 @@ const AuthModal: React.FC = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Username
@@ -110,6 +112,24 @@ const AuthModal: React.FC = () => {
             />
           </div>
 
+          {mode === 'register' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                placeholder="Email"
+                value={formData.email || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={isLoading}
@@ -126,6 +146,7 @@ const AuthModal: React.FC = () => {
               setMode(mode === 'login' ? 'register' : 'login');
               setError(null);
               setSuccess(null);
+              setFormData({ ...formData, password: '', email: '' });
             }}
             className="text-blue-600 hover:underline text-sm"
           >

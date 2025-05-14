@@ -1,16 +1,20 @@
-# Image bazë
-FROM node:18.20.0-alpine
+# Imazh më i sigurt dhe i përditësuar automatikisht
+FROM node:lts-slim
 
-
-# Krijo direktorinë e aplikacionit në container
+# Vendos direktorinë e punës
 WORKDIR /app
 
-# Kopjo file-t e nevojshëm
+# Kopjo vetëm skedarët e paketës për të përfituar nga layer cache
 COPY package*.json ./
+
+# Instalo varësitë
 RUN npm install
 
-# Kopjo gjithë kodin
+# Kopjo të gjithë kodin e aplikacionit
 COPY . .
 
-# Starto aplikacionin
+# Porta default (mund të shtosh EXPOSE 3000 nëse përdor këtë port)
+EXPOSE 3000
+
+# Starto aplikacionin në development mode
 CMD ["npm", "run", "dev"]

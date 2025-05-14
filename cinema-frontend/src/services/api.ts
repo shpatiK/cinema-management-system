@@ -31,11 +31,24 @@ export const login = async (username: string, password: string) => {
   return response.data; // should include { token }
 };
 
-export const register = async (username: string, password: string) => {
+export const register = async (
+  username: string,
+  password: string,
+  email?: string // Make optional with ?
+) => {
   const response = await axios.post(`http://localhost:3000/auth/register`, {
     username,
+    email, 
     password,
   });
+  return response.data;
+};
+
+export const verifyAccount = async (token: string) => {
+  const response = await axios.get(
+    `http://localhost:3000/auth/activate`, 
+    { params: { token } } 
+  );
   return response.data;
 };
 

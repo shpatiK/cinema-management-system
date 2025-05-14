@@ -22,18 +22,19 @@ import { Request, Response } from 'express';
  *           example: "Activation email sent"
  */
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
     const activationToken = crypto.randomBytes(20).toString('hex');
 
     const user = await User.create({
       username,
+      email,
       password,
       activationToken,
     });
 
-    await sendActivationEmail(username, activationToken);
+    await sendActivationEmail(email, activationToken);
     res.status(201).json({ message: 'Activation email sent' });
   } catch (error) {
     res.status(400).json({ error: 'Registration failed' });
@@ -66,7 +67,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: 'Login failed' });
   }
 };
-
 /**
  * Handles account activation
  * @throws {400} Invalid activation token

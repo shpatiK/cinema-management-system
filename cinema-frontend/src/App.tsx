@@ -16,7 +16,9 @@ import MovieDetailsPage from './components/MovieDetailsPage';
 import Header from './components/Header';
 import AdvertisingPage from './pages/AdvertisingPage';
 import BookingPage from './pages/BookingPage';
+import ActivationPage from './pages/ActivationPage';
 import { ModalProvider } from './context/ModalContext';
+
 
 // Add this ScrollToTop component
 const ScrollToTop = () => {
@@ -56,6 +58,7 @@ function App() {
                 <Route path="/movies/:id" element={<MovieDetailsPage />} />
                 <Route path="/advertising" element={<AdvertisingPage />} />
                 <Route path="/booking/:id" element={<BookingPage />} />
+                <Route path="/activate" element={<ActivationPage />} />
               </Routes>
             </main>
 
