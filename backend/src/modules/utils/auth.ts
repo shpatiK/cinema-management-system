@@ -1,12 +1,17 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = 'your-very-secure-secret'; 
-const EXPIRES_IN = '1h'; // Token expiration time
+const JWT_SECRET = process.env.JWT_SECRET!;
 
-// Token generation
-export function generateToken(userId: number, role: string): string {
-  return jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '1h' });
+if (!JWT_SECRET) {
+  throw new Error("Missing JWT_SECRET environment variable");
+}
+
+export function generateToken(user: { id: number; role: string }): string {
+  const payload = { id: user.id, role: user.role }; // Fixed: consistent with id
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' }); // Extended to 24h
 }
 
 // Token verification
@@ -36,7 +41,7 @@ export const authMiddleware = (
   }
 };
 
-//  Role-checking middleware
+// Role-checking middleware
 export const checkRole = (role: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if ((req as any).user?.role !== role) {

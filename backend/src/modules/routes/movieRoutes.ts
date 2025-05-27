@@ -54,6 +54,43 @@ const router = express.Router();
  *           items:
  *             type: string
  *             example: "Sci-Fi"
+ *     MovieWithShowtimes:
+ *       allOf:
+ *         - $ref: '#/components/schemas/Movie'
+ *         - type: object
+ *           properties:
+ *             showtimes:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   cinema:
+ *                     type: string
+ *                     example: "Galeria Shopping Mall"
+ *                   time:
+ *                     type: string
+ *                     format: time
+ *                     example: "14:30:00"
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                     example: "2025-01-25"
+ *                   hall:
+ *                     type: string
+ *                     example: "Hall 1"
+ *                   seats:
+ *                     type: integer
+ *                     example: 120
+ *                   type:
+ *                     type: string
+ *                     enum: [2D, 3D, IMAX]
+ *                     example: "2D"
+ *                   price:
+ *                     type: number
+ *                     format: decimal
+ *                     example: 12.00
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -65,8 +102,14 @@ const router = express.Router();
  *           example: "Title is required"
  */
 
-// Apply validation and authentication to all routes
-router.use(validateMovie);
+// Apply validation and authentication to all routes except GET
+router.use((req, res, next) => {
+  if (req.method === 'GET') {
+    next();
+  } else {
+    validateMovie(req, res, next);
+  }
+});
 
 /**
  * @swagger
@@ -100,7 +143,7 @@ router.use(validateMovie);
  *       500:
  *         description: Internal server error
  */
-router.post('/', validateMovie, MovieController.createMovie);
+router.post('/', MovieController.createMovie);
 
 /**
  * @swagger
@@ -137,7 +180,7 @@ router.post('/', validateMovie, MovieController.createMovie);
  *       401:
  *         description: Unauthorized
  */
-router.put('/:id', validateMovie, MovieController.updateMovie);
+router.put('/:id', MovieController.updateMovie);
 
 /**
  * @swagger
@@ -172,6 +215,38 @@ router.put('/:id', validateMovie, MovieController.updateMovie);
  *         description: Internal server error
  */
 router.get('/', MovieController.getAllMovies);
+
+/**
+ * @swagger
+ * /movies/{id}:
+ *   get:
+ *     summary: Get a movie by ID with showtimes
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Movie ID
+ *         example: 2
+ *     responses:
+ *       200:
+ *         description: Movie details with showtimes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MovieWithShowtimes'
+ *       404:
+ *         description: Movie not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:id', MovieController.getMovieById);
 
 /**
  * @swagger

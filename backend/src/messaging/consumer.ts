@@ -1,6 +1,6 @@
 import amqp from 'amqplib';
 
-const RABBITMQ_URL = 'amqp://localhost';
+const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost';
 
 export const consumeMessages = async (queue: string, callback: (msg: any) => void) => {
   try {
@@ -8,8 +8,7 @@ export const consumeMessages = async (queue: string, callback: (msg: any) => voi
     const channel = await connection.createChannel();
 
     await channel.assertQueue(queue, { durable: true });
-
-    console.log(`📥 Duke dëgjuar queue '${queue}' për mesazhe...`);
+    console.log(`📥 Listening to queue '${queue}'...`);
 
     channel.consume(queue, (msg) => {
       if (msg !== null) {
@@ -19,6 +18,6 @@ export const consumeMessages = async (queue: string, callback: (msg: any) => voi
       }
     });
   } catch (error) {
-    console.error('❌ Gabim gjatë konsumimit të mesazhit:', error);
+    console.error('❌ Message consumption error:', error);
   }
 };

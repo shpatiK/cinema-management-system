@@ -1,6 +1,12 @@
 import { Router } from 'express';
-import { login, register, activate } from '../controllers/AuthController';
-import { Request, Response } from 'express';
+import {
+  register,
+  login,
+  activate,
+  getCurrentUser,
+  updateProfile
+} from '../controllers/AuthController';
+import { authenticateToken } from '../middlewares/authenticateToken';
 
 const router = Router();
 
@@ -26,6 +32,7 @@ const router = Router();
  *             required:
  *               - username
  *               - password
+ *               - email
  *             properties:
  *               username:
  *                 type: string
@@ -35,6 +42,10 @@ const router = Router();
  *                 type: string
  *                 minLength: 6
  *                 example: "securePassword123"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "user@example.com"
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -45,7 +56,7 @@ const router = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Activation email sent"
+ *                   example: "Registration successful! Check your email to activate your account."
  *       400:
  *         description: Registration failed
  *         content:
@@ -55,7 +66,7 @@ const router = Router();
  *               properties:
  *                 error:
  *                   type: string
- *                   example: "Registration failed"
+ *                   example: "Username already exists"
  */
 router.post('/register', register);
 
@@ -92,6 +103,17 @@ router.post('/register', register);
  *                 token:
  *                   type: string
  *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: number
+ *                     username:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
  *       401:
  *         description: Invalid credentials or account not activated
  *         content:
@@ -131,11 +153,91 @@ router.post('/login', login);
  *                 message:
  *                   type: string
  *                   example: "Account activated successfully"
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
  *       400:
  *         description: Invalid activation token
  *       500:
  *         description: Activation failed
  */
 router.get('/activate', activate);
+
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Get current user information
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.get('/me', authenticateToken, getCurrentUser);
+
+/**
+ * @swagger
+ * /auth/update-profile:
+ *   put:
+ *     summary: Update user profile
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *       400:
+ *         description: Username or email already exists
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.put('/update-profile', authenticateToken, updateProfile);
 
 export default router;

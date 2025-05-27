@@ -1,74 +1,136 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AuthModalProvider } from './context/AuthModalContext';
-import HomePage from './pages/HomePage';
-import MoviesPage from './pages/MoviesPage';
-import EventsPage from './pages/EventsPage';
-import ClubPage from './pages/ClubPage';
-import RentPage from './pages/RentPage';
-import CinemasPage from './pages/CinemasPage';
-import AuthModal from './components/AuthModal';
-import SearchPage from './pages/SearchPage';
-import PrivacyPolicyPage from './/pages/PrivacyPolicyPage';
-import ContactUsPage from './pages/ContactUsPage';
-import Footer from './components/Footer'; 
-import MovieDetailsPage from './components/MovieDetailsPage';
-import Header from './components/Header';
-import AdvertisingPage from './pages/AdvertisingPage';
-import BookingPage from './pages/BookingPage';
-import ActivationPage from './pages/ActivationPage';
-import { ModalProvider } from './context/ModalContext';
+import type React from "react"
+import { useEffect } from "react"
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom"
+import { AuthModalProvider } from "./context/AuthModalContext"
+import { AuthProvider } from "./context/AuthContext"
+import HomePage from "./pages/HomePage"
+import MoviesPage from "./pages/MoviesPage"
+import EventsPage from "./pages/EventsPage"
+import ClubPage from "./pages/ClubPage"
+import RentPage from "./pages/RentPage"
+import CinemasPage from "./pages/CinemasPage"
+import AuthModal from "./components/AuthModal"
+import SearchPage from "./pages/SearchPage"
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage"
+import ContactUsPage from "./pages/ContactUsPage"
+import Footer from "./components/Footer"
+import MovieDetailsPage from "./components/MovieDetailsPage"
+import Header from "./components/Header"
+import AdvertisingPage from "./pages/AdvertisingPage"
+import BookingPage from "./pages/BookingPage"
+import ActivationPage from "./pages/ActivationPage"
+import { ModalProvider } from "./context/ModalContext"
+import DashboardPage from "./pages/DashboardPage"
+import { PayPalScriptProvider } from "@paypal/react-paypal-js"
 
-
-// Add this ScrollToTop component
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
+  const { pathname } = useLocation()
 
   useEffect(() => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth' // Smooth scrolling animation
-    });
-  }, [pathname]);
+      behavior: "smooth",
+    })
+  }, [pathname])
 
-  return null;
-};
+  return null
+}
 
 function App() {
   return (
-    <AuthModalProvider>
-      <ModalProvider>
-        <Router>
-          {/* Add ScrollToTop right inside Router */}
-          <ScrollToTop />
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            
-            <main className="flex-grow container mx-auto p-4">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/movies" element={<MoviesPage />} />
-                <Route path="/events" element={<EventsPage />} />
-                <Route path="/cinema" element={<CinemasPage />} />
-                <Route path="/club" element={<ClubPage />} />
-                <Route path="/rent" element={<RentPage />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                <Route path="/contact-us" element={<ContactUsPage />} />
-                <Route path="/movies/:id" element={<MovieDetailsPage />} />
-                <Route path="/advertising" element={<AdvertisingPage />} />
-                <Route path="/booking/:id" element={<BookingPage />} />
-                <Route path="/activate" element={<ActivationPage />} />
-              </Routes>
-            </main>
+    <PayPalScriptProvider
+      options={{ clientId: "AYDahqNqNSJKUt2bmX_4XP2ZTtixRkVL-Q4T6m8QMbY5I3lZKl-QDB2Ez46T4iu_dfgPG1WojyiC-tC6" }}
+    >
+      <AuthProvider>
+        <AuthModalProvider>
+          <ModalProvider>
+            <Router>
+              <ScrollToTop />
+              <div className="flex flex-col min-h-screen">
+                {/* Fixed header that floats over content */}
+                <Header />
 
-            <Footer />
-            <AuthModal />
-          </div>
-        </Router>
-      </ModalProvider>
-    </AuthModalProvider>
-  );
+                {/* Main content with no top padding for homepage */}
+                <main className="flex-grow">
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/movies" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <MoviesPage />
+                      </div>
+                    } />
+                    <Route path="/events" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <EventsPage />
+                      </div>
+                    } />
+                    <Route path="/cinema" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <CinemasPage />
+                      </div>
+                    } />
+                    <Route path="/club" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <ClubPage />
+                      </div>
+                    } />
+                    <Route path="/rent" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <RentPage />
+                      </div>
+                    } />
+                    <Route path="/search" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <SearchPage />
+                      </div>
+                    } />
+                    <Route path="/privacy-policy" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <PrivacyPolicyPage />
+                      </div>
+                    } />
+                    <Route path="/contact-us" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <ContactUsPage />
+                      </div>
+                    } />
+                    <Route path="/movies/:id" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <MovieDetailsPage />
+                      </div>
+                    } />
+                    <Route path="/advertising" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <AdvertisingPage />
+                      </div>
+                    } />
+                    <Route path="/booking/:id" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <BookingPage />
+                      </div>
+                    } />
+                    <Route path="/activate" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <ActivationPage />
+                      </div>
+                    } />
+                    <Route path="/dashboard" element={
+                      <div className="pt-32 container mx-auto p-4">
+                        <DashboardPage />
+                      </div>
+                    } />
+                  </Routes>
+                </main>
+
+                <Footer />
+                <AuthModal />
+              </div>
+            </Router>
+          </ModalProvider>
+        </AuthModalProvider>
+      </AuthProvider>
+    </PayPalScriptProvider>
+  )
 }
 
-export default App;
+export default App

@@ -1,56 +1,76 @@
-import { DataTypes, Model } from 'sequelize';
-import sequelize from '../../db/postgres';
+import { DataTypes, Model, Optional } from 'sequelize';
+import { sequelize } from '../../db/postgres'; // Fixed import path
 
-class Movie extends Model {}
+interface MovieAttributes {
+  id: number;
+  title: string;
+  duration?: number;
+  release_year: number;
+  poster_url: string;
+  description?: string;
+  director?: string;
+  actors?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface MovieCreationAttributes extends Optional<MovieAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
+
+class Movie extends Model<MovieAttributes, MovieCreationAttributes> implements MovieAttributes {
+  public id!: number;
+  public title!: string;
+  public duration?: number;
+  public release_year!: number;
+  public poster_url!: string;
+  public description?: string;
+  public director?: string;
+  public actors?: string;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
 
 Movie.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
-      validate: {
-        notEmpty: true
-      }
     },
     duration: {
       type: DataTypes.INTEGER,
-      validate: {
-        min: 1
-      }
+      allowNull: true,
     },
     release_year: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      validate: {
-        isInt: true,
-        min: 1888, // First movie ever made
-        max: new Date().getFullYear() + 5 // Allow future releases
-      }
     },
     poster_url: {
-      type: DataTypes.STRING,
-      allowNull: false, // Make required
-      validate: {
-        notEmpty: true,
-        isUrl: true // Validate it's a proper URL/path
-      }
-    }
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    director: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    actors: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,
-    modelName: 'movie',
-    timestamps: true
+    modelName: 'Movie',
+    tableName: 'movies',
+    timestamps: true,
   }
 );
-
-// Safe sync - use force: false to prevent data loss
-(async () => {
-  try {
-    await Movie.sync({ alter: true }); // Correct way to use alter
-    console.log('✅ Movies table updated safely!');
-  } catch (error) {
-    console.error('❌ Update failed:', error);
-  }
-})();
 
 export default Movie;

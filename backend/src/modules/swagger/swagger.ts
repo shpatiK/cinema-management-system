@@ -8,12 +8,12 @@ const options = {
     info: {
       title: 'Cinema Management API',
       version: '1.0.0',
-      description: 'API documentation for Cinema Management System',
+      description: 'API documentation',
     },
     servers: [
       {
-        url: 'http://localhost:3000', 
-        description: 'Development server',
+        url: process.env.API_URL || 'http://localhost:3000',
+        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
       },
     ],
     components: {
@@ -26,11 +26,10 @@ const options = {
       },
     },
   },
- 
   apis: [
-    './src/modules/routes/*.ts',      
-    './src/modules/controllers/*.ts',  
-    './src/modules/schemas/*.ts',      
+    './src/modules/routes/*.ts',
+    './src/modules/controllers/*.ts',
+    './src/modules/schemas/*.ts',
   ],
 };
 
@@ -38,10 +37,10 @@ const specs = swaggerJsdoc(options);
 
 export const setupSwagger = (app: any) => {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-  
- 
   app.get('/api-docs-json', (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(specs);
   });
 };
+
+export { options };

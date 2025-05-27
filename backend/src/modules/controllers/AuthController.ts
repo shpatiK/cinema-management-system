@@ -1,93 +1,197 @@
-import User from '../models/User';
-import { generateToken } from '../utils/auth';
-import { sendActivationEmail } from '../utils/email';
-import crypto from 'crypto';
 import { Request, Response } from 'express';
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     UserAuthResponse:
- *       type: object
- *       properties:
- *         token:
- *           type: string
- *           description: JWT token for authenticated requests
- *     ActivationResponse:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *           example: "Activation email sent"
- */
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { generateToken } from '../utils/auth';
+import User from '../models/User';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, email, password } = req.body;
-    const activationToken = crypto.randomBytes(20).toString('hex');
+    const { username, password, email } = req.body;
+
+    const existingUser = await User.findOne({ where: { username } });
+    if (existingUser) {
+      res.status(400).json({ error: 'Username already exists' });
+      return;
+    }
+
+    const existingEmail = await User.findOne({ where: { email } });
+    if (existingEmail) {
+      res.status(400).json({ error: 'Email already exists' });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       username,
+      password: hashedPassword,
       email,
-      password,
-      activationToken,
+      isActive: false,
+      role: 'user',
     });
 
-    await sendActivationEmail(email, activationToken);
-    res.status(201).json({ message: 'Activation email sent' });
+    const activationToken = generateToken(user);
+    // TODO: Send activation email with token
+    // await sendActivationEmail(email, activationToken);
+
+    res.status(201).json({ 
+      message: 'Registration successful! Check your email to activate your account.',
+      // For development, you can auto-activate and return token
+      // token: activationToken,
+      // user: {
+      //   id: user.id,
+      //   username: user.username,
+      //   email: user.email,
+      //   role: user.role
+      // }
+    });
   } catch (error) {
-    res.status(400).json({ error: 'Registration failed' });
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Registration failed' });
   }
 };
 
-/**
- * Handles user login
- * @throws {401} Invalid credentials or inactive account
- * @throws {500} Server error
- */
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { username, password } = req.body;
+
     const user = await User.findOne({ where: { username } });
-
-    if (!user || !(await user.comparePassword(password))) {
-       res.status(401).json({ error: 'Invalid credentials' });
-       return;
+    if (!user || !user.isActive) {
+      res.status(401).json({ error: 'Account not activated or invalid credentials' });
+      return;
     }
 
-    if (!user.isActive) {
-       res.status(401).json({ error: 'Account not activated. Check your email.' });
-       return;
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
 
-    const token = generateToken(user.id, user.role);
-    res.json({ token });
+    const token = generateToken(user);
+    
+    // Return both token and user info for dashboard
+    res.status(200).json({ 
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
   }
 };
-/**
- * Handles account activation
- * @throws {400} Invalid activation token
- * @throws {500} Activation failed
- */
+
 export const activate = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { token } = req.query;
-    const user = await User.findOne({ where: { activationToken: token } });
+    const token = req.query.token as string;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
 
+    const user = await User.findByPk(decoded.id);
     if (!user) {
-       res.status(400).json({ error: 'Invalid activation token' });
-       return;
+      res.status(404).json({ error: 'User not found' });
+      return;
     }
 
     user.isActive = true;
-    user.activationToken = null;
     await user.save();
 
-    res.json({ message: 'Account activated successfully' });
+    // Auto-login after activation - generate new token
+    const loginToken = generateToken(user);
+    
+    res.status(200).json({ 
+      message: 'Account activated successfully',
+      token: loginToken,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Activation failed' });
+    console.error('Activation error:', error);
+    res.status(400).json({ error: 'Invalid or expired activation token' });
   }
+};
+
+export const getCurrentUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?.id;
+
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'username', 'email', 'role'],
+    });
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Fetch user error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?.id;
+    const { username, email } = req.body;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Check if username is already taken by another user
+    if (username !== user.username) {
+      const existingUser = await User.findOne({ 
+        where: { username },
+      });
+      if (existingUser && existingUser.id !== userId) {
+        res.status(400).json({ error: 'Username already exists' });
+        return;
+      }
+    }
+
+    // Check if email is already taken by another user
+    if (email !== user.email) {
+      const existingEmail = await User.findOne({ 
+        where: { email },
+      });
+      if (existingEmail && existingEmail.id !== userId) {
+        res.status(400).json({ error: 'Email already exists' });
+        return;
+      }
+    }
+
+    user.username = username;
+    user.email = email;
+    await user.save();
+
+    res.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Export all functions individually AND as default
+export default {
+  register,
+  login,
+  activate,
+  getCurrentUser,
+  updateProfile,
 };

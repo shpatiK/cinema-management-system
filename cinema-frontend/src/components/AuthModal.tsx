@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthModal } from '../context/AuthModalContext';
+import { useAuth } from '../context/AuthContext';
 import { login, register } from '../services/api';
 
 type AuthMode = 'login' | 'register';
@@ -12,6 +14,7 @@ interface AuthFormData {
 
 const AuthModal: React.FC = () => {
   const { isOpen, closeModal } = useAuthModal();
+  const { login: authLogin } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [formData, setFormData] = useState<AuthFormData>({
     username: '',
@@ -22,6 +25,8 @@ const AuthModal: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -31,13 +36,25 @@ const AuthModal: React.FC = () => {
     try {
       if (mode === 'login') {
         const data = await login(formData.username, formData.password);
-        localStorage.setItem('token', data.token);
+        
+        // Use auth context to set user data
+        authLogin(data.token, data.user);
+        
         closeModal();
-        window.location.reload();
+        navigate('/dashboard');
       } else {
         if (!formData.email) throw new Error('Email is required');
-        await register(formData.username, formData.password, formData.email);
-        setSuccess('Check your email to activate your account.');
+        const response = await register(formData.username, formData.password, formData.email);
+        
+        // Check if registration includes auto-login (token)
+        if (response.token) {
+          authLogin(response.token, response.user);
+          closeModal();
+          navigate('/dashboard');
+        } else {
+          setSuccess('Registration successful! Check your email to activate your account.');
+          setFormData({ username: '', email: '', password: '' });
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Authentication failed');
@@ -146,7 +163,7 @@ const AuthModal: React.FC = () => {
               setMode(mode === 'login' ? 'register' : 'login');
               setError(null);
               setSuccess(null);
-              setFormData({ ...formData, password: '', email: '' });
+              setFormData({ username: '', email: '', password: '' });
             }}
             className="text-blue-600 hover:underline text-sm"
           >
