@@ -1,19 +1,27 @@
 "use client"
 import { Link } from "react-router-dom"
+import type React from "react"
+
 import { FaClock, FaStar } from "react-icons/fa"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../context/AuthContext"
+import { useAuthModal } from "../context/AuthModalContext"
 
 interface MovieCardProps {
   id: number
   title: string
-  duration: number // Required
-  release_year?: number // Optional
-  poster_url?: string // Optional
+  duration: number
+  release_year?: number
+  poster_url?: string
   genre?: string
   rating?: number
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ id, title, duration, release_year, poster_url, rating }) => {
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+  const { openModal } = useAuthModal()
+
   // Format duration from minutes to "1h 56m"
   const formatDuration = (mins: number) => {
     const hours = Math.floor(mins / 60)
@@ -21,21 +29,31 @@ const MovieCard: React.FC<MovieCardProps> = ({ id, title, duration, release_year
     return `${hours}h ${minutes}m`
   }
 
-  const navigate = useNavigate()
+  const handleBookNow = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
 
-  const handleBookNow = () => {
+    if (!isAuthenticated) {
+      // Show login modal if user is not authenticated
+      openModal()
+      return
+    }
+
+    // Clear any existing booking data in sessionStorage to prevent conflicts
+    sessionStorage.removeItem("selectedMovie")
+    sessionStorage.removeItem("selectedShowtime")
+
+    console.log(`Booking initiated for movie ID: ${id} - ${title}`)
+
+    // Navigate to movie details page first so user can select showtime
+    // This ensures proper movie and showtime data is stored in sessionStorage
     navigate(`/movies/${id}`)
   }
 
   // Get the correct poster URL
   const getPosterUrl = () => {
-    // Skip if no poster_url exists
     if (!poster_url) return "/placeholder-movie.jpg"
-
-    // Handle full URLs (if any)
     if (poster_url.startsWith("http")) return poster_url
-
-    // Construct correct backend URL
     return `http://localhost:3000/posters/${poster_url}`
   }
 
@@ -74,14 +92,10 @@ const MovieCard: React.FC<MovieCardProps> = ({ id, title, duration, release_year
             </span>
           </div>
           <button
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              handleBookNow()
-            }}
+            onClick={handleBookNow}
             className="w-full py-3 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg transition-colors duration-300 transform group-hover:translate-y-0 translate-y-10"
           >
-            Book Now
+            {isAuthenticated ? "Book Now" : "Login to Book"}
           </button>
         </div>
       </div>
@@ -90,14 +104,3 @@ const MovieCard: React.FC<MovieCardProps> = ({ id, title, duration, release_year
 }
 
 export default MovieCard
-
-
-
-
-
-
-
-
-
-
-

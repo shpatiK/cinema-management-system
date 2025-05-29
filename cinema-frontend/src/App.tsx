@@ -17,6 +17,7 @@ import MovieDetailsPage from "./components/MovieDetailsPage"
 import Header from "./components/Header"
 import AdvertisingPage from "./pages/AdvertisingPage"
 import BookingPage from "./pages/BookingPage"
+import BookingConfirmationPage from "./pages/BookingConfirmationPage"
 import ActivationPage from "./pages/ActivationPage"
 import { ModalProvider } from "./context/ModalContext"
 import DashboardPage from "./pages/DashboardPage"
@@ -94,12 +95,9 @@ function App() {
                           <RentPage />
                         </div>
                       }
-                      />
-                       <Route 
-                       path="/AboutUsPage" 
-                       element={<AboutUsPage />} />
-                  
-                    
+                    />
+                    <Route path="/AboutUsPage" element={<AboutUsPage />} />
+
                     <Route
                       path="/privacy-policy"
                       element={
@@ -132,11 +130,21 @@ function App() {
                         </div>
                       }
                     />
+                    {/* Updated booking route to use movieId parameter */}
                     <Route
-                      path="/booking/:id"
+                      path="/booking/:movieId"
                       element={
                         <div className="pt-32 container mx-auto p-4">
                           <BookingPage />
+                        </div>
+                      }
+                    />
+                    {/* New booking confirmation route */}
+                    <Route
+                      path="/booking-confirmation/:reference"
+                      element={
+                        <div className="pt-32 container mx-auto p-4">
+                          <BookingConfirmationPage />
                         </div>
                       }
                     />

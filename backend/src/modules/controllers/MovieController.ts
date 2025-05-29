@@ -1,27 +1,27 @@
-import { Request, Response } from 'express';
-import { redisClient } from '../../cache/redisClient';
-import { sequelize } from '../../db/postgres';
-import { QueryTypes } from 'sequelize';
+import type { Request, Response } from "express"
+import { redisClient } from "../../cache/redisClient"
+import { sequelize } from "../../db/postgres"
+import { QueryTypes } from "sequelize"
 
 class MovieController {
   // GET movie by ID with showtimes
-  getMovieById = async (req: Request, res: Response): Promise<void> => {
-    const movieId = req.params.id;
-    const cacheKey = `movie_${movieId}`;
+  static async getMovieById(req: Request, res: Response): Promise<void> {
+    const movieId = req.params.id
+    const cacheKey = `movie_${movieId}`
 
-    console.log('🔍 Fetching movie with ID:', movieId);
+    console.log("🔍 Fetching movie with ID:", movieId)
 
     try {
       // Check cache first
-      const cached = await redisClient.get(cacheKey);
+      const cached = await redisClient.get(cacheKey)
       if (cached) {
-        console.log('🔁 Movie details served from cache');
-        const cachedString = typeof cached === 'string' ? cached : cached.toString('utf-8');
-        res.json(JSON.parse(cachedString));
-        return;
+        console.log("🔁 Movie details served from cache")
+        const cachedString = typeof cached === "string" ? cached : cached.toString("utf-8")
+        res.json(JSON.parse(cachedString))
+        return
       }
 
-      console.log('📊 Executing database query...');
+      console.log("📊 Executing database query...")
 
       const query = `
         SELECT 
@@ -52,84 +52,83 @@ class MovieController {
         LEFT JOIN showtimes s ON m.id = s.movie_id 
         WHERE m.id = :movieId
         GROUP BY m.id, m.title, m.duration, m.release_year, m.poster_url, m.description, m.director, m.actors
-      `;
-      
-      console.log('🔍 Query:', query);
-      console.log('🔍 Parameters:', { movieId });
+      `
+
+      console.log("🔍 Query:", query)
+      console.log("🔍 Parameters:", { movieId })
 
       const results = await sequelize.query(query, {
         replacements: { movieId },
-        type: QueryTypes.SELECT
-      });
-      
-      console.log('📊 Query results:', results);
+        type: QueryTypes.SELECT,
+      })
+
+      console.log("📊 Query results:", results)
 
       if (!results || results.length === 0) {
-        console.log('❌ No movie found with ID:', movieId);
-        res.status(404).json({ error: 'Movie not found' });
-        return;
+        console.log("❌ No movie found with ID:", movieId)
+        res.status(404).json({ error: "Movie not found" })
+        return
       }
-      
-      const movie = results[0] as any;
-      console.log('🎬 Movie data before processing:', movie);
-      
+
+      const movie = results[0] as any
+      console.log("🎬 Movie data before processing:", movie)
+
       // Enhanced actors formatting - handle multiple formats
       if (movie.actors) {
-        let actorsArray: string[] = [];
-        
-        if (typeof movie.actors === 'string') {
+        let actorsArray: string[] = []
+
+        if (typeof movie.actors === "string") {
           // Handle different string formats
-          let actorsString = movie.actors;
-          
+          let actorsString = movie.actors
+
           // Remove curly braces, square brackets, and quotes
           actorsString = actorsString
-            .replace(/[{}\[\]"]/g, '') // Remove {, }, [, ], "
-            .replace(/'/g, '') // Remove single quotes
-            .trim();
-          
+            .replace(/[{}[\]"]/g, "") // Remove {, }, [, ], "
+            .replace(/'/g, "") // Remove single quotes
+            .trim()
+
           // Split by comma and clean up each actor name
           if (actorsString) {
             actorsArray = actorsString
-              .split(',')
+              .split(",")
               .map((actor: string) => actor.trim())
-              .filter((actor: string) => actor.length > 0);
+              .filter((actor: string) => actor.length > 0)
           }
         } else if (Array.isArray(movie.actors)) {
-          actorsArray = movie.actors;
+          actorsArray = movie.actors
         }
-        
-        movie.actors = actorsArray;
+
+        movie.actors = actorsArray
       } else {
-        movie.actors = [];
+        movie.actors = []
       }
 
-      console.log('🎬 Movie data after processing:', movie);
+      console.log("🎬 Movie data after processing:", movie)
 
       // Cache the result for 30 minutes
-      await redisClient.setEx(cacheKey, 1800, JSON.stringify(movie));
-      console.log('✅ Cached movie details');
-      
-      res.json(movie);
-      
+      await redisClient.setEx(cacheKey, 1800, JSON.stringify(movie))
+      console.log("✅ Cached movie details")
+
+      res.json(movie)
     } catch (err: any) {
-      console.error('❌ Database error:', err);
-      console.error('❌ Error details:', err.message);
-      res.status(500).json({ error: 'Internal server error', details: err.message });
+      console.error("❌ Database error:", err)
+      console.error("❌ Error details:", err.message)
+      res.status(500).json({ error: "Internal server error", details: err.message })
     }
-  };
+  }
 
   // GET all movies
-  getAllMovies = async (req: Request, res: Response): Promise<void> => {
+  static async getAllMovies(req: Request, res: Response): Promise<void> {
     try {
-      const cacheKey = 'all_movies';
-      
+      const cacheKey = "all_movies"
+
       // Check cache first
-      const cached = await redisClient.get(cacheKey);
+      const cached = await redisClient.get(cacheKey)
       if (cached) {
-        console.log('🔁 Movies served from cache');
-        const cachedString = typeof cached === 'string' ? cached : cached.toString('utf-8');
-        res.json(JSON.parse(cachedString));
-        return;
+        console.log("🔁 Movies served from cache")
+        const cachedString = typeof cached === "string" ? cached : cached.toString("utf-8")
+        res.json(JSON.parse(cachedString))
+        return
       }
 
       const query = `
@@ -144,102 +143,101 @@ class MovieController {
           actors
         FROM movies 
         ORDER BY release_year DESC
-      `;
+      `
 
       const results = await sequelize.query(query, {
-        type: QueryTypes.SELECT
-      });
+        type: QueryTypes.SELECT,
+      })
 
       // Fix actors formatting for all movies
-      const moviesWithFormattedActors = (results as any[]).map(movie => {
-        if (movie.actors && typeof movie.actors === 'string') {
-          let actorsString = movie.actors
-            .replace(/[{}\[\]"']/g, '') // Remove all brackets and quotes
-            .trim();
-          
+      const moviesWithFormattedActors = (results as any[]).map((movie) => {
+        if (movie.actors && typeof movie.actors === "string") {
+          const actorsString = movie.actors
+            .replace(/[{}[\]"']/g, "") // Remove all brackets and quotes
+            .trim()
+
           if (actorsString) {
             movie.actors = actorsString
-              .split(',')
+              .split(",")
               .map((actor: string) => actor.trim())
-              .filter((actor: string) => actor.length > 0);
+              .filter((actor: string) => actor.length > 0)
           } else {
-            movie.actors = [];
+            movie.actors = []
           }
         }
-        return movie;
-      });
+        return movie
+      })
 
       // Cache for 10 minutes
-      await redisClient.setEx(cacheKey, 600, JSON.stringify(moviesWithFormattedActors));
-      
-      res.json(moviesWithFormattedActors);
+      await redisClient.setEx(cacheKey, 600, JSON.stringify(moviesWithFormattedActors))
+
+      res.json(moviesWithFormattedActors)
     } catch (err: any) {
-      console.error('❌ Error fetching movies:', err);
-      res.status(500).json({ error: 'Internal server error', details: err.message });
+      console.error("❌ Error fetching movies:", err)
+      res.status(500).json({ error: "Internal server error", details: err.message })
     }
-  };
+  }
 
   // CREATE new movie
-  createMovie = async (req: Request, res: Response): Promise<void> => {
+  static async createMovie(req: Request, res: Response): Promise<void> {
     try {
-      const { title, duration, release_year, poster_url, description, director, actors } = req.body;
+      const { title, duration, release_year, poster_url, description, director, actors } = req.body
 
       // Validate required fields
       if (!title || !release_year || !poster_url) {
-        res.status(400).json({ 
-          error: 'Missing required fields', 
-          required: ['title', 'release_year', 'poster_url'] 
-        });
-        return;
+        res.status(400).json({
+          error: "Missing required fields",
+          required: ["title", "release_year", "poster_url"],
+        })
+        return
       }
 
       // Format actors as comma-separated string if it's an array
-      let actorsString = actors;
+      let actorsString = actors
       if (Array.isArray(actors)) {
-        actorsString = actors.join(', ');
+        actorsString = actors.join(", ")
       }
 
       const query = `
         INSERT INTO movies (title, duration, release_year, poster_url, description, director, actors, "createdAt", "updatedAt")
         VALUES (:title, :duration, :release_year, :poster_url, :description, :director, :actors, NOW(), NOW())
         RETURNING *
-      `;
+      `
 
       const results = await sequelize.query(query, {
-        replacements: { 
-          title, 
-          duration: duration || null, 
-          release_year, 
-          poster_url, 
+        replacements: {
+          title,
+          duration: duration || null,
+          release_year,
+          poster_url,
           description: description || null,
           director: director || null,
-          actors: actorsString || null
+          actors: actorsString || null,
         },
-        type: QueryTypes.INSERT
-      });
+        type: QueryTypes.INSERT,
+      })
 
       // Clear cache
-      await redisClient.del('all_movies');
+      await redisClient.del("all_movies")
 
-      console.log('✅ Movie created successfully');
-      res.status(201).json(results[0]);
-      
+      console.log("✅ Movie created successfully")
+      res.status(201).json(results[0])
     } catch (err: any) {
-      console.error('❌ Error creating movie:', err);
-      res.status(500).json({ error: 'Internal server error', details: err.message });
+      console.error("❌ Error creating movie:", err)
+      res.status(500).json({ error: "Internal server error", details: err.message })
     }
-  };
+  }
 
   // UPDATE movie
-  updateMovie = async (req: Request, res: Response): Promise<void> => {
+  static async updateMovie(req: Request, res: Response): Promise<void> {
     try {
-      const movieId = req.params.id;
-      const { title, duration, release_year, poster_url, description, director, actors } = req.body;
+      const movieId = req.params.id
+      const { title, duration, release_year, poster_url, description, director, actors } = req.body
 
       // Format actors as comma-separated string if it's an array
-      let actorsString = actors;
+      let actorsString = actors
       if (Array.isArray(actors)) {
-        actorsString = actors.join(', ');
+        actorsString = actors.join(", ")
       }
 
       const query = `
@@ -255,10 +253,10 @@ class MovieController {
           "updatedAt" = NOW()
         WHERE id = :movieId
         RETURNING *
-      `;
+      `
 
       const results = await sequelize.query(query, {
-        replacements: { 
+        replacements: {
           movieId,
           title: title || null,
           duration: duration || null,
@@ -266,72 +264,70 @@ class MovieController {
           poster_url: poster_url || null,
           description: description || null,
           director: director || null,
-          actors: actorsString || null
+          actors: actorsString || null,
         },
-        type: QueryTypes.UPDATE
-      });
+        type: QueryTypes.UPDATE,
+      })
 
       if (!results[0] || (results[0] as any[]).length === 0) {
-        res.status(404).json({ error: 'Movie not found' });
-        return;
+        res.status(404).json({ error: "Movie not found" })
+        return
       }
 
       // Clear cache
-      await redisClient.del('all_movies');
-      await redisClient.del(`movie_${movieId}`);
+      await redisClient.del("all_movies")
+      await redisClient.del(`movie_${movieId}`)
 
-      console.log('✅ Movie updated successfully');
-      res.json(results[0]);
-      
+      console.log("✅ Movie updated successfully")
+      res.json(results[0])
     } catch (err: any) {
-      console.error('❌ Error updating movie:', err);
-      res.status(500).json({ error: 'Internal server error', details: err.message });
+      console.error("❌ Error updating movie:", err)
+      res.status(500).json({ error: "Internal server error", details: err.message })
     }
-  };
+  }
 
   // DELETE movie
-  deleteMovie = async (req: Request, res: Response): Promise<void> => {
+  static async deleteMovie(req: Request, res: Response): Promise<void> {
     try {
-      const movieId = req.params.id;
+      const movieId = req.params.id
 
       // First check if movie exists
-      const checkQuery = `SELECT id FROM movies WHERE id = :movieId`;
+      const checkQuery = `SELECT id FROM movies WHERE id = :movieId`
       const existingMovie = await sequelize.query(checkQuery, {
         replacements: { movieId },
-        type: QueryTypes.SELECT
-      });
+        type: QueryTypes.SELECT,
+      })
 
       if (!existingMovie || existingMovie.length === 0) {
-        res.status(404).json({ error: 'Movie not found' });
-        return;
+        res.status(404).json({ error: "Movie not found" })
+        return
       }
 
       // Delete related showtimes first (if any)
-      const deleteShowtimesQuery = `DELETE FROM showtimes WHERE movie_id = :movieId`;
+      const deleteShowtimesQuery = `DELETE FROM showtimes WHERE movie_id = :movieId`
       await sequelize.query(deleteShowtimesQuery, {
         replacements: { movieId },
-        type: QueryTypes.DELETE
-      });
+        type: QueryTypes.DELETE,
+      })
 
       // Delete the movie
-      const deleteMovieQuery = `DELETE FROM movies WHERE id = :movieId`;
+      const deleteMovieQuery = `DELETE FROM movies WHERE id = :movieId`
       await sequelize.query(deleteMovieQuery, {
         replacements: { movieId },
-        type: QueryTypes.DELETE
-      });
+        type: QueryTypes.DELETE,
+      })
 
       // Clear cache
-      await redisClient.del('all_movies');
-      await redisClient.del(`movie_${movieId}`);
+      await redisClient.del("all_movies")
+      await redisClient.del(`movie_${movieId}`)
 
-      console.log('✅ Movie deleted successfully');
-      res.json({ message: 'Movie deleted successfully' });
-      
+      console.log("✅ Movie deleted successfully")
+      res.json({ message: "Movie deleted successfully" })
     } catch (err: any) {
-      console.error('❌ Error deleting movie:', err);
-      res.status(500).json({ error: 'Internal server error', details: err.message });
+      console.error("❌ Error deleting movie:", err)
+      res.status(500).json({ error: "Internal server error", details: err.message })
     }
-  };
+  }
 }
 
-export default new MovieController();
+export default MovieController

@@ -1,8 +1,8 @@
-import express from 'express';
-import MovieController from '../controllers/MovieController';
-import validateMovie from '../../modules/middlewares/validate.middleware';
+import { Router } from "express"
+import MovieController from "../controllers/MovieController"
+import { authMiddleware } from "../utils/auth" // Update to match your middleware name
 
-const router = express.Router();
+const router = Router()
 
 /**
  * @swagger
@@ -14,46 +14,55 @@ const router = express.Router();
 /**
  * @swagger
  * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
  *   schemas:
  *     Movie:
  *       type: object
  *       required:
  *         - title
- *         - director
- *         - releaseYear
+ *         - release_year
+ *         - poster_url
  *       properties:
  *         id:
- *           type: string
- *           format: uuid
- *           example: 5f8d04b3ab35de3d342acd4a
+ *           type: integer
+ *           example: 1
  *           description: Auto-generated movie ID
  *         title:
  *           type: string
  *           example: "Inception"
- *           maxLength: 100
+ *           maxLength: 255
  *         director:
  *           type: string
  *           example: "Christopher Nolan"
- *         releaseYear:
+ *         release_year:
  *           type: integer
  *           format: int32
  *           example: 2010
  *           minimum: 1888
- *           maximum: 2025
+ *           maximum: 2030
  *         duration:
  *           type: integer
  *           description: Duration in minutes
  *           example: 148
- *         genres:
- *           type: array
- *           items:
- *             type: string
- *             example: "Sci-Fi"
+ *         poster_url:
+ *           type: string
+ *           example: "/posters/inception.jpg"
+ *         description:
+ *           type: string
+ *           example: "A thief who steals corporate secrets through dream-sharing technology"
+ *         actors:
+ *           oneOf:
+ *             - type: string
+ *               example: "Leonardo DiCaprio, Marion Cotillard, Tom Hardy"
+ *             - type: array
+ *               items:
+ *                 type: string
+ *               example: ["Leonardo DiCaprio", "Marion Cotillard", "Tom Hardy"]
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
  *     MovieWithShowtimes:
  *       allOf:
  *         - $ref: '#/components/schemas/Movie'
@@ -68,11 +77,11 @@ const router = express.Router();
  *                     type: integer
  *                   cinema:
  *                     type: string
- *                     example: "Galeria Shopping Mall"
+ *                     example: "INOX Mall"
  *                   time:
  *                     type: string
  *                     format: time
- *                     example: "14:30:00"
+ *                     example: "19:30"
  *                   date:
  *                     type: string
  *                     format: date
@@ -82,15 +91,51 @@ const router = express.Router();
  *                     example: "Hall 1"
  *                   seats:
  *                     type: integer
- *                     example: 120
+ *                     example: 100
  *                   type:
  *                     type: string
  *                     enum: [2D, 3D, IMAX]
- *                     example: "2D"
+ *                     example: "IMAX"
  *                   price:
  *                     type: number
  *                     format: decimal
- *                     example: 12.00
+ *                     example: 15.00
+ *     CreateMovieRequest:
+ *       type: object
+ *       required:
+ *         - title
+ *         - release_year
+ *         - poster_url
+ *       properties:
+ *         title:
+ *           type: string
+ *           example: "Inception"
+ *           maxLength: 255
+ *         director:
+ *           type: string
+ *           example: "Christopher Nolan"
+ *         release_year:
+ *           type: integer
+ *           example: 2010
+ *           minimum: 1888
+ *           maximum: 2030
+ *         duration:
+ *           type: integer
+ *           example: 148
+ *         poster_url:
+ *           type: string
+ *           example: "/posters/inception.jpg"
+ *         description:
+ *           type: string
+ *           example: "A thief who steals corporate secrets through dream-sharing technology"
+ *         actors:
+ *           oneOf:
+ *             - type: string
+ *               example: "Leonardo DiCaprio, Marion Cotillard, Tom Hardy"
+ *             - type: array
+ *               items:
+ *                 type: string
+ *               example: ["Leonardo DiCaprio", "Marion Cotillard", "Tom Hardy"]
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -100,91 +145,14 @@ const router = express.Router();
  *         message:
  *           type: string
  *           example: "Title is required"
- */
-
-// Apply validation and authentication to all routes except GET
-router.use((req, res, next) => {
-  if (req.method === 'GET') {
-    next();
-  } else {
-    validateMovie(req, res, next);
-  }
-});
-
-/**
- * @swagger
- * /movies:
- *   post:
- *     summary: Create a new movie
- *     tags: [Movies]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Movie'
- *     responses:
- *       201:
- *         description: Movie created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Movie'
- *       400:
- *         description: Validation error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       401:
- *         description: Unauthorized - Invalid or missing token
- *       500:
- *         description: Internal server error
- */
-router.post('/', MovieController.createMovie);
-
-/**
- * @swagger
- * /movies/{id}:
- *   put:
- *     summary: Update a movie by ID
- *     tags: [Movies]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
+ *         details:
  *           type: string
- *         required: true
- *         description: Movie ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Movie'
- *     responses:
- *       200:
- *         description: Movie updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Movie'
- *       400:
- *         description: Invalid input
- *       404:
- *         description: Movie not found
- *       401:
- *         description: Unauthorized
+ *           example: "Additional error details"
  */
-router.put('/:id', MovieController.updateMovie);
 
 /**
  * @swagger
- * /movies:
+ * /api/movies:
  *   get:
  *     summary: Get all movies
  *     tags: [Movies]
@@ -195,13 +163,21 @@ router.put('/:id', MovieController.updateMovie);
  *           type: integer
  *           minimum: 1
  *           maximum: 100
+ *           default: 20
  *         description: Limit number of movies returned
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           minimum: 1
+ *           default: 1
  *         description: Page number for pagination
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search movies by title, director, or description
+ *         example: "inception"
  *     responses:
  *       200:
  *         description: List of movies
@@ -213,12 +189,16 @@ router.put('/:id', MovieController.updateMovie);
  *                 $ref: '#/components/schemas/Movie'
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/', MovieController.getAllMovies);
+router.get("/", MovieController.getAllMovies)
 
 /**
  * @swagger
- * /movies/{id}:
+ * /api/movies/{id}:
  *   get:
  *     summary: Get a movie by ID with showtimes
  *     tags: [Movies]
@@ -229,7 +209,7 @@ router.get('/', MovieController.getAllMovies);
  *           type: integer
  *         required: true
  *         description: Movie ID
- *         example: 2
+ *         example: 1
  *     responses:
  *       200:
  *         description: Movie details with showtimes
@@ -245,12 +225,114 @@ router.get('/', MovieController.getAllMovies);
  *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/:id', MovieController.getMovieById);
+router.get("/:id", MovieController.getMovieById)
 
 /**
  * @swagger
- * /movies/{id}:
+ * /api/movies:
+ *   post:
+ *     summary: Create a new movie
+ *     tags: [Movies]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateMovieRequest'
+ *     responses:
+ *       201:
+ *         description: Movie created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Movie'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post("/", authMiddleware, MovieController.createMovie)
+
+/**
+ * @swagger
+ * /api/movies/{id}:
+ *   put:
+ *     summary: Update a movie by ID
+ *     tags: [Movies]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Movie ID
+ *         example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateMovieRequest'
+ *     responses:
+ *       200:
+ *         description: Movie updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Movie'
+ *       400:
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Movie not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.put("/:id", authMiddleware, MovieController.updateMovie)
+
+/**
+ * @swagger
+ * /api/movies/{id}:
  *   delete:
  *     summary: Delete a movie by ID
  *     tags: [Movies]
@@ -260,19 +342,40 @@ router.get('/:id', MovieController.getMovieById);
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: integer
  *         required: true
  *         description: Movie ID
+ *         example: 1
  *     responses:
- *       204:
+ *       200:
  *         description: Movie deleted successfully
- *       404:
- *         description: Movie not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Movie deleted successfully"
  *       401:
  *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Movie not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.delete('/:id', MovieController.deleteMovie);
+router.delete("/:id", authMiddleware, MovieController.deleteMovie)
 
-export default router;
+export default router

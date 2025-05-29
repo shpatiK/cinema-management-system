@@ -341,3 +341,147 @@ export const deleteMovie = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ error: "Failed to delete movie", details: error.message })
   }
 }
+
+// Booking management functions
+export const getAllBookings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { page = 1, limit = 50, status, date } = req.query
+
+    let whereClause = ""
+    const replacements: any = {}
+
+    if (status) {
+      whereClause += " WHERE b.booking_status = :status"
+      replacements.status = status
+    }
+
+    if (date) {
+      const dateCondition = status ? " AND" : " WHERE"
+      whereClause += `${dateCondition} DATE(b.booking_date) = :date`
+      replacements.date = date
+    }
+
+    const offset = (Number(page) - 1) * Number(limit)
+    replacements.limit = Number(limit)
+    replacements.offset = offset
+
+    const query = `
+      SELECT 
+        b.*,
+        m.title as movie_title,
+        m.poster_url,
+        s.cinema,
+        s.hall,
+        s.date as showtime_date,
+        s.time as showtime_time,
+        s.type as screen_type,
+        u.username,
+        u.email as user_email
+      FROM bookings b
+      JOIN showtimes s ON b.showtime_id = s.id
+      JOIN movies m ON s.movie_id = m.id
+      JOIN users u ON b.user_id = u.id
+      ${whereClause}
+      ORDER BY b.booking_date DESC
+      LIMIT :limit OFFSET :offset
+    `
+
+    const bookings = await sequelize.query(query, {
+      replacements,
+      type: QueryTypes.SELECT,
+    })
+
+    // Get total count
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM bookings b
+      JOIN showtimes s ON b.showtime_id = s.id
+      JOIN movies m ON s.movie_id = m.id
+      JOIN users u ON b.user_id = u.id
+      ${whereClause}
+    `
+
+    const countResult = await sequelize.query(countQuery, {
+      replacements: Object.fromEntries(
+        Object.entries(replacements).filter(([key]) => key !== "limit" && key !== "offset"),
+      ),
+      type: QueryTypes.SELECT,
+    })
+
+    const total = (countResult[0] as any).total
+
+    res.json({
+      bookings,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total: Number(total),
+        pages: Math.ceil(Number(total) / Number(limit)),
+      },
+    })
+  } catch (error: any) {
+    console.error("Error fetching all bookings:", error)
+    res.status(500).json({ error: "Failed to fetch bookings", details: error.message })
+  }
+}
+
+export const updateBookingStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { bookingId } = req.params
+    const { status } = req.body
+
+    if (!["confirmed", "cancelled", "pending"].includes(status)) {
+      res.status(400).json({ error: "Invalid status" })
+      return
+    }
+
+    const updateQuery = `
+      UPDATE bookings 
+      SET booking_status = :status, updated_at = NOW()
+      WHERE id = :bookingId
+      RETURNING *
+    `
+
+    const result = await sequelize.query(updateQuery, {
+      replacements: { bookingId, status },
+      type: QueryTypes.UPDATE,
+    })
+
+    if (!result[0] || (result[0] as any[]).length === 0) {
+      res.status(404).json({ error: "Booking not found" })
+      return
+    }
+
+    // Clear caches
+    await redisClient.del("admin_bookings")
+
+    console.log("✅ Booking status updated successfully")
+    res.json(result[0])
+  } catch (error: any) {
+    console.error("Error updating booking status:", error)
+    res.status(500).json({ error: "Failed to update booking status", details: error.message })
+  }
+}
+
+export const getBookingStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const statsQuery = `
+      SELECT 
+        COUNT(*) as total_bookings,
+        SUM(total_price) as total_revenue,
+        COUNT(CASE WHEN booking_status = 'confirmed' THEN 1 END) as confirmed_bookings,
+        COUNT(CASE WHEN booking_status = 'cancelled' THEN 1 END) as cancelled_bookings,
+        COUNT(CASE WHEN DATE(booking_date) = CURRENT_DATE THEN 1 END) as today_bookings
+      FROM bookings
+    `
+
+    const result = await sequelize.query(statsQuery, {
+      type: QueryTypes.SELECT,
+    })
+
+    res.json(result[0])
+  } catch (error: any) {
+    console.error("Error fetching booking stats:", error)
+    res.status(500).json({ error: "Failed to fetch booking stats", details: error.message })
+  }
+}

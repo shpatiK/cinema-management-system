@@ -35,6 +35,7 @@ api.interceptors.response.use(
   },
 )
 
+// Movie functions
 export const fetchMovies = async () => {
   try {
     console.log("🎬 Fetching movies from /api/movies")
@@ -47,23 +48,126 @@ export const fetchMovies = async () => {
   }
 }
 
-// New function to search movies
+export const fetchMovieById = async (movieId: string | number) => {
+  try {
+    console.log(`🎬 Fetching movie ${movieId}`)
+    const response = await api.get(`/api/movies/${movieId}`)
+    console.log("🎬 Movie fetched:", response.data)
+    return response.data
+  } catch (error) {
+    console.error(`Error fetching movie ${movieId}:`, error)
+    throw error
+  }
+}
+
+// Showtime functions
+export const fetchShowtimesByMovie = async (movieId: string | number) => {
+  try {
+    console.log(`🎭 Fetching showtimes for movie ${movieId}`)
+    const response = await api.get(`/api/showtimes/movie/${movieId}`)
+    console.log("🎭 Showtimes fetched:", response.data)
+    return response.data
+  } catch (error) {
+    console.error(`Error fetching showtimes for movie ${movieId}:`, error)
+    throw error
+  }
+}
+
+// Search function
 export const searchMovies = async (query: string) => {
   try {
     console.log(`🔍 Searching movies with query: "${query}"`)
-    // If your backend has a search endpoint, use it
-    // const response = await api.get(`/api/movies/search?q=${encodeURIComponent(query)}`)
-
-    // Otherwise, fetch all movies and filter client-side
     const response = await api.get("/api/movies")
-
-    // Filter movies by title (case-insensitive)
     const filteredMovies = response.data.filter((movie: any) => movie.title.toLowerCase().includes(query.toLowerCase()))
-
     console.log(`🔍 Found ${filteredMovies.length} movies matching "${query}"`)
     return filteredMovies
   } catch (error) {
     console.error(`Error searching movies for "${query}":`, error)
+    throw error
+  }
+}
+
+// Booking functions
+export const createBooking = async (bookingData: CreateBookingData) => {
+  try {
+    console.log("🎫 Creating booking:", bookingData)
+    const response = await api.post("/api/bookings", bookingData)
+    console.log("🎫 Booking created:", response.data)
+    return response.data
+  } catch (error) {
+    console.error("Error creating booking:", error)
+    throw error
+  }
+}
+
+export const getUserBookings = async () => {
+  try {
+    console.log("🎫 Fetching user bookings")
+    const response = await api.get("/api/bookings/my-bookings")
+    console.log("🎫 User bookings fetched:", response.data)
+    return response.data
+  } catch (error) {
+    console.error("Error fetching user bookings:", error)
+    throw error
+  }
+}
+
+export const getBookingByReference = async (reference: string) => {
+  try {
+    console.log(`🎫 Fetching booking by reference: ${reference}`)
+    const response = await api.get(`/api/bookings/reference/${reference}`)
+    console.log("🎫 Booking fetched:", response.data)
+    return response.data
+  } catch (error) {
+    console.error(`Error fetching booking ${reference}:`, error)
+    throw error
+  }
+}
+
+export const cancelBooking = async (bookingId: number) => {
+  try {
+    console.log(`🎫 Cancelling booking: ${bookingId}`)
+    const response = await api.put(`/api/bookings/${bookingId}/cancel`)
+    console.log("🎫 Booking cancelled:", response.data)
+    return response.data
+  } catch (error) {
+    console.error(`Error cancelling booking ${bookingId}:`, error)
+    throw error
+  }
+}
+
+// Admin booking functions
+export const fetchAdminBookings = async (params?: {
+  page?: number
+  limit?: number
+  status?: string
+  date?: string
+}) => {
+  try {
+    console.log("🎫 Fetching admin bookings")
+    const queryParams = new URLSearchParams()
+    if (params?.page) queryParams.append("page", params.page.toString())
+    if (params?.limit) queryParams.append("limit", params.limit.toString())
+    if (params?.status) queryParams.append("status", params.status)
+    if (params?.date) queryParams.append("date", params.date)
+
+    const response = await api.get(`/api/admin/bookings?${queryParams.toString()}`)
+    console.log("🎫 Admin bookings fetched:", response.data)
+    return response.data
+  } catch (error) {
+    console.error("Error fetching admin bookings:", error)
+    throw error
+  }
+}
+
+export const updateBookingStatus = async (bookingId: number, status: string) => {
+  try {
+    console.log(`🎫 Updating booking ${bookingId} status to ${status}`)
+    const response = await api.put(`/api/admin/bookings/${bookingId}/status`, { status })
+    console.log("🎫 Booking status updated:", response.data)
+    return response.data
+  } catch (error) {
+    console.error(`Error updating booking ${bookingId} status:`, error)
     throw error
   }
 }
@@ -117,7 +221,7 @@ export const deleteAdminMovie = async (movieId: number): Promise<{ message: stri
   }
 }
 
-// Consistent Movie type definition
+// Type definitions
 export interface Movie {
   id: number
   title: string
@@ -126,12 +230,11 @@ export interface Movie {
   poster_url: string
   description?: string
   director?: string
-  actors?: string[] | string // Can be array or string
+  actors?: string[] | string
   createdAt?: string
   updatedAt?: string
 }
 
-// Type for creating/updating movies
 export interface CreateMovieData {
   title: string
   duration?: number
@@ -139,15 +242,65 @@ export interface CreateMovieData {
   poster_url: string
   description?: string
   director?: string
-  actors?: string[] | string // Can accept both formats
+  actors?: string[] | string
 }
 
+export interface Showtime {
+  id: number
+  movie_id: number
+  cinema: string
+  hall: string
+  date: string
+  time: string
+  seats: number
+  type: string
+  price: number
+}
+
+export interface CreateBookingData {
+  showtime_id: number
+  number_of_tickets: number
+  customer_name: string
+  customer_email: string
+  customer_phone?: string
+  seat_numbers?: string[]
+  payment_method?: string
+}
+
+export interface Booking {
+  id: number
+  user_id: number
+  showtime_id: number
+  booking_reference: string
+  number_of_tickets: number
+  total_price: number
+  booking_status: string
+  customer_name: string
+  customer_email: string
+  customer_phone?: string
+  seat_numbers?: string
+  payment_method: string
+  payment_status: string
+  booking_date: string
+  created_at: string
+  updated_at: string
+  // Joined fields
+  movie_title?: string
+  poster_url?: string
+  cinema?: string
+  hall?: string
+  showtime_date?: string
+  showtime_time?: string
+  screen_type?: string
+}
+
+// Auth functions
 export const login = async (username: string, password: string) => {
   const response = await api.post("/api/auth/login", {
     username,
     password,
   })
-  return response.data // Returns { token, user }
+  return response.data
 }
 
 export const register = async (username: string, password: string, email: string) => {
