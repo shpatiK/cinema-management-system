@@ -1,139 +1,396 @@
-import React from 'react';
-import { useAuthModal } from '../context/AuthModalContext';
-import popcornImg from '../assets/images/popcorn.jpg';
-import drinkImg from '../assets/images/drink.png';
-import nachosImg from '../assets/images/nachos.png';
-import ticketImg from '../assets/images/ticket.png';
-import kitkatImg from '../assets/images/kitkat.jpg';
-import bonusCardImg from '../assets/images/bonuscard.jpg'; // Import your bonus card image
+"use client"
+
+import { useState } from "react"
+import { useAuthModal } from "../context/AuthModalContext"
+import { FaGift, FaStar, FaTicketAlt, FaCreditCard, FaMobile, FaPercent } from "react-icons/fa"
+import PaypalButton from "../components/PaypalButton"
+
+// Import images
+import popcornImg from "../assets/images/popcorn.jpg"
+import drinkImg from "../assets/images/drink.png"
+import nachosImg from "../assets/images/nachos.png"
+import ticketImg from "../assets/images/ticket.png"
+import kitkatImg from "../assets/images/kitkat.jpg"
+import bonusCardImg from "../assets/images/bonuscard.jpg"
 
 const ClubPage = () => {
-  const { openModal } = useAuthModal();
+  const { openModal } = useAuthModal()
+  const [activeTab, setActiveTab] = useState("benefits")
+  const [showPayPalModal, setShowPayPalModal] = useState(false)
+  const [selectedAmount, setSelectedAmount] = useState("")
+
   const rewards = [
-    { points: 250, reward: "SMALL POPCORN ", icon: popcornImg },
-    { points: 300, reward: "MEDIUM SOFT DRINK (0.5L)", icon: drinkImg },
-    { points: 350, reward: "SWEETS", icon: kitkatImg },
-    { points: 400, reward: "MEDIUM POPCORN", icon: popcornImg },
-    { points: 500, reward: "SMALL NACHOS", icon: nachosImg },
-    { points: 1000, reward: "10x FREE TICKETS", icon: ticketImg },
-  ];
+    { points: 250, reward: "SMALL POPCORN", icon: popcornImg, category: "snacks" },
+    { points: 300, reward: "MEDIUM SOFT DRINK (0.5L)", icon: drinkImg, category: "drinks" },
+    { points: 350, reward: "SWEETS", icon: kitkatImg, category: "snacks" },
+    { points: 400, reward: "MEDIUM POPCORN", icon: popcornImg, category: "snacks" },
+    { points: 500, reward: "SMALL NACHOS", icon: nachosImg, category: "snacks" },
+    { points: 1000, reward: "10x FREE TICKETS", icon: ticketImg, category: "tickets" },
+  ]
+
+  const memberBenefits = [
+    {
+      icon: <FaPercent className="text-yellow-600" />,
+      title: "20% Discount on Tickets",
+      description: "Save on every movie ticket purchase",
+    },
+    {
+      icon: <FaGift className="text-yellow-600" />,
+      title: "Exclusive Rewards",
+      description: "Redeem points for free snacks and tickets",
+    },
+    {
+      icon: <FaStar className="text-yellow-600" />,
+      title: "VIP Treatment",
+      description: "Priority booking and special screenings",
+    },
+    {
+      icon: <FaTicketAlt className="text-yellow-600" />,
+      title: "Birthday Perks",
+      description: "Free ticket on your birthday month",
+    },
+    {
+      icon: <FaCreditCard className="text-yellow-600" />,
+      title: "Easy Payment",
+      description: "Quick checkout with stored card balance",
+    },
+    {
+      icon: <FaMobile className="text-yellow-600" />,
+      title: "Mobile App Access",
+      description: "Manage your account and book tickets on-the-go",
+    },
+  ]
+
+  const topUpBenefits = [
+    { amount: "€20", discount: "€0.50", bonus: "50 bonus points" },
+    { amount: "€35", discount: "€0.50", bonus: "100 bonus points" },
+    { amount: "€50", discount: "€0.50", bonus: "150 bonus points" },
+  ]
+
+  const handlePayPalSuccess = (details: any) => {
+    alert(`Top-up successful! Thank you, ${details.payer?.name?.given_name || "customer"}`)
+    setShowPayPalModal(false)
+    setSelectedAmount("")
+  }
+
+  const handleTopUp = (amount: string) => {
+    setSelectedAmount(amount)
+    setShowPayPalModal(true)
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header with bonus card */}
-      <div className="bg-black text-white py-4 px-6 relative">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-bold">INOX CLUB</h1>
-          <img 
-            src={bonusCardImg} 
-            alt="Bonus Card" 
-            className="h-16 w-auto object-contain absolute right-6 top-1/2 transform -translate-y-1/2" 
-          />
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      {/* Hero Section with Card Animation */}
+      <div className="relative bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-900 text-white py-16 overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-10">
+          {[...Array(15)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white animate-pulse"
+              style={{
+                width: `${Math.random() * 6 + 2}px`,
+                height: `${Math.random() * 6 + 2}px`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="md:flex items-center justify-between">
+            <div className="md:w-2/3 text-center md:text-left">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4">
+                INOX <span className="text-yellow-500">CLUB</span>
+              </h1>
+              <p className="text-xl md:text-2xl mb-6 text-white text-opacity-90">
+                Join our exclusive membership program and unlock amazing rewards with every visit!
+              </p>
+              <div className="flex flex-wrap justify-center md:justify-start gap-4 mb-8">
+                <div className="bg-black bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <span className="font-bold">20%</span> off tickets
+                </div>
+                <div className="bg-black bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <span className="font-bold">Free</span> birthday ticket
+                </div>
+                <div className="bg-black bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <span className="font-bold">Exclusive</span> rewards
+                </div>
+              </div>
+              <button
+                onClick={openModal}
+                className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                JOIN NOW - IT'S FREE!
+              </button>
+            </div>
+
+            {/* Bonus Card with Animation */}
+            <div className="md:w-1/3 mt-8 md:mt-0 flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-yellow-500 rounded-xl blur-xl opacity-50 animate-pulse"></div>
+                <img
+                  src={bonusCardImg || "/placeholder.svg"}
+                  alt="INOX Bonus Card"
+                  className="relative h-48 w-auto object-contain transform hover:scale-110 transition-transform duration-300 drop-shadow-2xl"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Hero Section with centered text */}
-      <div className="bg-yellow-600 text-white py-12 px-4 text-center relative">
-        {/* Bonus card image - hidden on mobile, shown on md+ screens */}
-        <img 
-          src={bonusCardImg} 
-          alt="Bonus Card" 
-          className="hidden md:block h-32 w-auto absolute right-8 top-1/2 transform -translate-y-1/2" 
-        />
-        <div className="max-w-2xl mx-auto relative z-10">
-          <h2 className="text-4xl font-bold mb-4">JOIN OUR CLUB!</h2>
-          <p className="text-xl">
-            Earn points with every purchase and enjoy exclusive member benefits
-          </p>
+      {/* Navigation Tabs */}
+      <div className="bg-white shadow-md sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex overflow-x-auto scrollbar-hide">
+            {[
+              { id: "benefits", label: "Member Benefits", icon: <FaStar /> },
+              { id: "rewards", label: "Rewards Catalog", icon: <FaGift /> },
+              { id: "topup", label: "Top-Up Benefits", icon: <FaCreditCard /> },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center px-6 py-4 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
+                  activeTab === tab.id
+                    ? "text-yellow-600 border-b-2 border-yellow-600 bg-yellow-50"
+                    : "text-gray-600 hover:text-yellow-600"
+                }`}
+              >
+                <span className="mr-2">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Benefits Section */}
-          <div>
-            <h3 className="text-2xl font-bold mb-6">MEMBER BENEFITS</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start">
-                <div className="bg-yellow-100 rounded-full p-1 mr-3">
-                  <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span>20% discount on all tickets</span>
-              </li>
-              {/* Other list items... */}
-            </ul>
-
-            <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-              <h4 className="text-lg font-bold mb-4">HOW IT WORKS</h4>
-              <p className="mb-4">
-                With Bonus Card you can pay and get discounts for maximum 2 tickets per day. 
-                You can earn up to 150 bonus points per day on tickets.
-              </p>
-              <p>
-                At the concession stand, you can earn bonus points for maximum €50 spent per day.
+        {/* Member Benefits Tab */}
+        {activeTab === "benefits" && (
+          <div className="space-y-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Exclusive <span className="text-yellow-600">Member Benefits</span>
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Enjoy premium perks and savings every time you visit INOX Cinema
               </p>
             </div>
-          </div>
 
-          {/* Rewards Section */}
-          <div>
-            <h3 className="text-2xl font-bold mb-6">REWARDS CATALOG</h3>
-            <div className="grid gap-4">
-              {rewards.map((item, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg shadow-md flex items-center">
-                  <div className="bg-yellow-600 text-white font-bold rounded-full w-12 h-12 flex-shrink-0 flex items-center justify-center mr-4">
-                    {item.points}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {memberBenefits.map((benefit, index) => (
+                <div
+                  key={index}
+                  className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="flex items-center mb-4">
+                    <div className="bg-yellow-100 p-3 rounded-full mr-4">{benefit.icon}</div>
+                    <h3 className="font-bold text-lg">{benefit.title}</h3>
                   </div>
-                  {item.icon && (
-                    <div className="w-16 h-16 flex-shrink-0 mr-4">
-                      <img 
-                        src={item.icon} 
-                        alt={item.reward.split('(')[0].trim()} 
-                        className="w-full h-full object-contain"
-                      />
+                  <p className="text-gray-600">{benefit.description}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* How It Works Section */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-xl">
+              <h3 className="text-2xl font-bold mb-6 text-center">How INOX Club Works</h3>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="bg-yellow-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                    1
+                  </div>
+                  <h4 className="font-bold mb-2">Sign Up</h4>
+                  <p className="text-gray-600">Create your free INOX Club account and get your bonus card</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-yellow-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                    2
+                  </div>
+                  <h4 className="font-bold mb-2">Earn Points</h4>
+                  <p className="text-gray-600">Get points with every ticket and concession purchase</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-yellow-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                    3
+                  </div>
+                  <h4 className="font-bold mb-2">Redeem Rewards</h4>
+                  <p className="text-gray-600">Use your points for free tickets, snacks, and exclusive perks</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rewards Catalog Tab */}
+        {activeTab === "rewards" && (
+          <div className="space-y-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Rewards <span className="text-yellow-600">Catalog</span>
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">Redeem your points for amazing rewards and treats</p>
+            </div>
+
+            <div className="grid gap-6">
+              {rewards.map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="flex items-center">
+                    {/* Points Badge */}
+                    <div className="bg-gradient-to-r from-yellow-600 to-yellow-500 text-white font-bold rounded-xl w-20 h-20 flex-shrink-0 flex flex-col items-center justify-center mr-6 shadow-lg">
+                      <span className="text-lg">{item.points}</span>
+                      <span className="text-xs">PTS</span>
                     </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="font-medium">{item.reward}</p>
+
+                    {/* Reward Image */}
+                    {item.icon && (
+                      <div className="w-20 h-20 flex-shrink-0 mr-6 bg-gray-50 rounded-lg p-2">
+                        <img
+                          src={item.icon || "/placeholder.svg"}
+                          alt={item.reward.split("(")[0].trim()}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
+
+                    {/* Reward Details */}
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg mb-2">{item.reward}</h3>
+                      <div className="flex items-center">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            item.category === "tickets"
+                              ? "bg-blue-100 text-blue-800"
+                              : item.category === "drinks"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-orange-100 text-orange-800"
+                          }`}
+                        >
+                          {item.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Redeem Button */}
+                    <button className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-300">
+                      Redeem
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        )}
 
-        {/* CTA Section */}
-        <div className="mt-16 bg-yellow-50 p-8 rounded-lg text-center">
-          <h3 className="text-2xl font-bold mb-4">TOP UP & GET MORE BENEFITS</h3>
-          <p className="mb-6 max-w-2xl mx-auto">
-            When you top up your Cineplexx Bonus Card with €20, €35 or €50 at the counter, 
-            you'll enjoy even more advantages:
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <p>€0.50 discount on tickets when you top up with €20, €35 or €50</p>
+        {/* Top-Up Benefits Tab */}
+        {activeTab === "topup" && (
+          <div className="space-y-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Top-Up <span className="text-yellow-600">Benefits</span>
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Load money onto your bonus card and enjoy additional discounts and bonus points
+              </p>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <p>Buy tickets online with €0.50 discount</p>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+              {topUpBenefits.map((benefit, index) => (
+                <div
+                  key={index}
+                  className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-center"
+                >
+                  <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                    {benefit.amount}
+                  </div>
+                  <h3 className="font-bold text-lg mb-2">Top-Up {benefit.amount}</h3>
+                  <div className="space-y-2 text-gray-600">
+                    <p>✓ {benefit.discount} discount per ticket</p>
+                    <p>✓ {benefit.bonus} bonus</p>
+                    <p>✓ Online booking discount</p>
+                  </div>
+                  <button
+                    onClick={() => handleTopUp(benefit.amount.replace("€", ""))}
+                    className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors duration-300"
+                  >
+                    Top-Up Now
+                  </button>
+                </div>
+              ))}
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <p>Online top-up through our app</p>
+
+            {/* Additional Benefits */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-xl">
+              <h3 className="text-2xl font-bold mb-6 text-center">Additional Top-Up Advantages</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex items-start">
+                  <div className="bg-green-100 p-2 rounded-full mr-4">
+                    <FaMobile className="text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-2">Mobile App Integration</h4>
+                    <p className="text-gray-600">Top-up your card directly through our mobile app anytime, anywhere</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="bg-green-100 p-2 rounded-full mr-4">
+                    <FaTicketAlt className="text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-2">Online Booking Discounts</h4>
+                    <p className="text-gray-600">
+                      Use your topped-up card for online bookings and get additional savings
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <button 
-            onClick={openModal}
-            className="bg-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 transition"
-          >
-            CREATE AN ACCOUNT
-          </button>
-          
+        )}
+
+        {/* Call to Action Section */}
+        <div className="mt-16 bg-gradient-to-r from-blue-900 to-indigo-900 p-8 md:p-12 rounded-xl text-white text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Start Earning Rewards?</h2>
+          <p className="text-xl mb-8 text-white text-opacity-90">
+            Join thousands of movie lovers who are already saving with INOX Club
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={openModal}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105"
+            >
+              CREATE FREE ACCOUNT
+            </button>
+          </div>
         </div>
       </div>
+      {/* PayPal Modal */}
+      {showPayPalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Top-Up €{selectedAmount}</h3>
+              <button onClick={() => setShowPayPalModal(false)} className="text-gray-500 hover:text-gray-700">
+                ×
+              </button>
+            </div>
+            <div className="mb-4">
+              <p className="text-gray-600">Complete your top-up payment using PayPal:</p>
+            </div>
+            <PaypalButton amount={selectedAmount} onSuccess={handlePayPalSuccess} />
+          </div>
+        </div>
+      )}
     </div>
-  );
-};
+  )
+}
 
-export default ClubPage;
+export default ClubPage

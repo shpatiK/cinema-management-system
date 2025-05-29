@@ -15,6 +15,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import { options } from './modules/swagger/swaggerConfig';
 import expressStatusMonitor from 'express-status-monitor';
 import { config } from './config';
+import adminRoutes from './modules/routes/adminRoutes';
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use(cors({
 }));
 app.use('/posters', express.static(path.join(__dirname, '../public/posters')));
 app.use(expressStatusMonitor());
+
 
 // Enhanced database initialization
 async function initializeDatabase() {
@@ -125,6 +127,7 @@ app.get('/', (req, res) => {
 // Routes - Fixed duplicate movie routes
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes); // Remove the duplicate line
+app.use('/api/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

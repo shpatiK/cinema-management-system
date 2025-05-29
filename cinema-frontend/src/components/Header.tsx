@@ -3,6 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { FaSearch, FaUser, FaSignOutAlt, FaCog, FaChevronDown } from 'react-icons/fa'
 import { useAuthModal } from '../context/AuthModalContext'
 import { useAuth } from '../context/AuthContext'
+import logo from '../assets/images/logo.png';
+
+
+
 
 const Header: React.FC = () => {
   const { openModal } = useAuthModal()
@@ -23,16 +27,12 @@ const Header: React.FC = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-md border-b border-gray-700/50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <div className="text-3xl font-bold text-white">
-              <span className="text-red-500">IN</span>
-              <span className="bg-white text-gray-900 px-1 rounded">O</span>
-              <span className="text-red-500">X</span>
-            </div>
-          </Link>
+  <div className="container mx-auto px-4">
+    <div className="flex items-center justify-between h-20">
+      {/* Logo */}
+      <Link to="/" className="flex items-center">
+        <img src={logo} alt="Logo" className="h-20 w-auto" />
+      </Link>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-8">

@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { FaChevronLeft, FaChevronRight, FaPlay, FaClock, FaStar } from 'react-icons/fa'
+"use client"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
+import { FaChevronLeft, FaChevronRight, FaPlay, FaClock, FaStar } from "react-icons/fa"
 
 interface Movie {
   id: number
@@ -11,18 +14,34 @@ interface Movie {
   genre?: string
   rating?: number
   description?: string
+  featured?: boolean
 }
 
 interface HeroSliderProps {
   movies: Movie[]
+  featuredMovieIds?: number[]
 }
 
-const HeroSlider: React.FC<HeroSliderProps> = ({ movies }) => {
+const HeroSlider: React.FC<HeroSliderProps> = ({ movies, featuredMovieIds }) => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
-  // Get featured movies (first 5 movies for the slider)
-  const featuredMovies = movies.slice(0, 5)
+  // Get featured movies based on the provided IDs (4 to 9)
+  const getFeaturedMovies = () => {
+    if (featuredMovieIds && featuredMovieIds.length > 0) {
+      // Filter movies by the provided IDs and maintain the order
+      const filteredMovies = featuredMovieIds
+        .map((id) => movies.find((movie) => movie.id === id))
+        .filter((movie) => movie !== undefined) as Movie[]
+
+      return filteredMovies
+    } else {
+      // Fall back to first 5 movies if no specific IDs provided
+      return movies.slice(0, 5)
+    }
+  }
+
+  const featuredMovies = getFeaturedMovies()
 
   // Auto-play functionality
   useEffect(() => {
@@ -64,7 +83,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies }) => {
       <div className="relative h-screen bg-gradient-to-r from-blue-900 to-purple-900 flex items-center justify-center">
         <div className="text-center text-white pt-32">
           <h2 className="text-4xl font-bold mb-4">Welcome to INOX Cinema</h2>
-          <p className="text-xl">Discover amazing movies coming soon!</p>
+          <p className="text-xl">No featured movies found with IDs 4-9. Please check your movie database.</p>
         </div>
       </div>
     )
@@ -74,7 +93,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies }) => {
   const currentMovie = featuredMovies[currentSlide]
 
   return (
-    <div 
+    <div
       className="relative h-screen overflow-hidden bg-black"
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
@@ -85,32 +104,32 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies }) => {
           <div
             key={`slide-${movie.id}-${index}`}
             className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
+              index === currentSlide ? "opacity-100" : "opacity-0"
             }`}
           >
             {/* Background Image with better positioning for movie posters */}
             <div className="absolute inset-0 flex">
               {/* Left side - Poster */}
               <div className="w-1/2 relative">
-                <div 
+                <div
                   className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                   style={{
                     backgroundImage: `url(${getPosterUrl(movie.poster_url)})`,
-                    backgroundPosition: 'center center',
-                    backgroundSize: 'cover'
+                    backgroundPosition: "center center",
+                    backgroundSize: "cover",
                   }}
                 />
                 {/* Gradient overlay on poster */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/20 to-black/80"></div>
               </div>
-              
+
               {/* Right side - Blurred background extension */}
               <div className="w-1/2 relative">
-                <div 
+                <div
                   className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-sm scale-110"
                   style={{
                     backgroundImage: `url(${getPosterUrl(movie.poster_url)})`,
-                    backgroundPosition: 'center center',
+                    backgroundPosition: "center center",
                   }}
                 />
                 {/* Strong overlay on blurred side */}
@@ -127,9 +146,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies }) => {
               <div className="container mx-auto px-8 lg:px-16">
                 <div className="max-w-2xl text-white ml-auto mr-8">
                   {/* Movie Title */}
-                  <h1 className="text-4xl lg:text-6xl font-bold mb-4 leading-tight drop-shadow-2xl">
-                    {movie.title}
-                  </h1>
+                  <h1 className="text-4xl lg:text-6xl font-bold mb-4 leading-tight drop-shadow-2xl">{movie.title}</h1>
 
                   {/* Movie Info */}
                   <div className="flex items-center space-x-6 mb-6 text-lg flex-wrap">
@@ -137,9 +154,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies }) => {
                       <FaClock className="mr-2" />
                       {formatDuration(movie.duration)}
                     </span>
-                    {movie.release_year && (
-                      <span className="drop-shadow-lg">{movie.release_year}</span>
-                    )}
+                    {movie.release_year && <span className="drop-shadow-lg">{movie.release_year}</span>}
                     {movie.rating && (
                       <span className="flex items-center drop-shadow-lg">
                         <FaStar className="text-yellow-400 mr-2" />
@@ -155,23 +170,23 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies }) => {
 
                   {/* Description */}
                   <p className="text-lg mb-8 leading-relaxed opacity-90 max-w-xl drop-shadow-lg">
-                    {movie.description && movie.description.length > 150 
-                      ? `${movie.description.substring(0, 150)}...` 
-                      : movie.description || `Experience the incredible story of ${movie.title}. A cinematic masterpiece that will captivate audiences with its stunning visuals and compelling narrative.`
-                    }
+                    {movie.description && movie.description.length > 150
+                      ? `${movie.description.substring(0, 150)}...`
+                      : movie.description ||
+                        `Experience the incredible story of ${movie.title}. A cinematic masterpiece that will captivate audiences with its stunning visuals and compelling narrative.`}
                   </p>
 
-                  {/* Action Buttons - Using currentMovie to ensure correct ID */}
+                  {/* Action Buttons */}
                   <div className="flex space-x-4">
                     <Link
-                      to={`/movies/${currentMovie.id}`}
+                      to={`/movies/${movie.id}`}
                       className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center text-lg shadow-xl"
                     >
                       <FaPlay className="mr-3" />
                       Book Now
                     </Link>
                     <Link
-                      to={`/movies/${currentMovie.id}`}
+                      to={`/movies/${movie.id}`}
                       className="border-2 border-white text-white hover:bg-white hover:text-black font-bold py-4 px-8 rounded-lg transition-all duration-300 text-lg backdrop-blur-sm"
                     >
                       More Info
@@ -210,9 +225,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies }) => {
               key={index}
               onClick={() => goToSlide(index)}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentSlide 
-                  ? 'bg-yellow-500 scale-125' 
-                  : 'bg-white/50 hover:bg-white/70'
+                index === currentSlide ? "bg-yellow-500 scale-125" : "bg-white/50 hover:bg-white/70"
               }`}
             />
           ))}

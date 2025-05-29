@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect, useRef } from "react"
 
 interface PayPalButtonProps {
@@ -35,4 +37,4 @@ const PayPalButton = ({ amount, onSuccess }: PayPalButtonProps) => {
   return <div ref={paypalRef}></div>
 }
 
-export default PayPalButton;
+export default PayPalButton
