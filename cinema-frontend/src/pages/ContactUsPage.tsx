@@ -17,6 +17,9 @@ const ContactUsPage = () => {
               <div>
                 <h3 className="font-medium">Address</h3>
                 <p className="text-gray-700">Galeria Shopping Mall,rr.Tirana, Prizren 20000, Kosovo</p>
+                <p className="text-gray-700">Albi Mall,Zona e re Industria, Prishtina, Kosovo</p>
+               <p className="text-gray-700">Prishtina Mall  M2 (Prishtinë - Ferizaj)</p>
+
               </div>
             </div>
             

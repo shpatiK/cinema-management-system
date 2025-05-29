@@ -47,6 +47,27 @@ export const fetchMovies = async () => {
   }
 }
 
+// New function to search movies
+export const searchMovies = async (query: string) => {
+  try {
+    console.log(`🔍 Searching movies with query: "${query}"`)
+    // If your backend has a search endpoint, use it
+    // const response = await api.get(`/api/movies/search?q=${encodeURIComponent(query)}`)
+
+    // Otherwise, fetch all movies and filter client-side
+    const response = await api.get("/api/movies")
+
+    // Filter movies by title (case-insensitive)
+    const filteredMovies = response.data.filter((movie: any) => movie.title.toLowerCase().includes(query.toLowerCase()))
+
+    console.log(`🔍 Found ${filteredMovies.length} movies matching "${query}"`)
+    return filteredMovies
+  } catch (error) {
+    console.error(`Error searching movies for "${query}":`, error)
+    throw error
+  }
+}
+
 // Admin movie functions
 export const fetchAdminMovies = async () => {
   try {

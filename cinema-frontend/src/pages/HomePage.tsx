@@ -96,7 +96,7 @@ const HomePage = () => {
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Now Showing</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Discover the latest blockbusters and indie gems playing at INOX Cinema
+              Discover the latest blockbusters playing at INOX Cinema
             </p>
           </div>
           <MovieList movies={movies} />

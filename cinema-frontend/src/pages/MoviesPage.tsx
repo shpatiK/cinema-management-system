@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { FaSearch, FaSortAmountDown, FaSortAmountUp, FaClock } from "react-icons/fa"
+import { useLocation, useNavigate } from "react-router-dom"
+import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa"
 import MovieCard from "../components/MovieCard"
+import SearchBar from "../components/SearchBar"
 import { fetchMovies } from "../services/api"
 
 interface MovieType {
@@ -16,20 +18,6 @@ interface MovieType {
   description?: string
 }
 
-// Sample genres - replace with your actual genres
-const genres = [
-  "Action",
-  "Adventure",
-  "Comedy",
-  "Drama",
-  "Horror",
-  "Sci-Fi",
-  "Thriller",
-  "Romance",
-  "Animation",
-  "Documentary",
-]
-
 const MoviesPage = () => {
   const [movies, setMovies] = useState<MovieType[]>([])
   const [loading, setLoading] = useState(true)
@@ -41,6 +29,19 @@ const MoviesPage = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [currentPage, setCurrentPage] = useState(1)
   const moviesPerPage = 12
+
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  // Check for search parameter in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search)
+    const searchParam = urlParams.get("search")
+    if (searchParam) {
+      setSearchQuery(searchParam)
+      setCurrentPage(1)
+    }
+  }, [location.search])
 
   useEffect(() => {
     const loadMovies = async () => {
@@ -58,6 +59,19 @@ const MoviesPage = () => {
     loadMovies()
   }, [])
 
+  // Handle search from SearchBar component
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    setCurrentPage(1) // Reset to first page when searching
+
+    // Update URL to reflect search
+    if (query.trim()) {
+      navigate(`/movies?search=${encodeURIComponent(query)}`, { replace: true })
+    } else {
+      navigate("/movies", { replace: true })
+    }
+  }
+
   // Filter and sort movies
   const filteredMovies = useMemo(() => {
     let result = [...movies]
@@ -65,7 +79,12 @@ const MoviesPage = () => {
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
-      result = result.filter((movie) => movie.title.toLowerCase().includes(query))
+      result = result.filter(
+        (movie) =>
+          movie.title.toLowerCase().includes(query) ||
+          movie.description?.toLowerCase().includes(query) ||
+          movie.genre?.toLowerCase().includes(query),
+      )
     }
 
     // Apply sorting
@@ -102,6 +121,7 @@ const MoviesPage = () => {
     setSortBy("release_year")
     setSortOrder("desc")
     setCurrentPage(1)
+    navigate("/movies", { replace: true })
   }
 
   // Skeleton loader for movies
@@ -127,21 +147,9 @@ const MoviesPage = () => {
             Explore our collection of the latest blockbusters, timeless classics, and independent gems
           </p>
 
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaSearch className="text-gray-400" />
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
-                setCurrentPage(1)
-              }}
-              placeholder="Search for movies..."
-              className="w-full pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-gray-800"
-            />
+          {/* Search Bar - Using your custom SearchBar component */}
+          <div className="max-w-2xl mx-auto">
+            <SearchBar onSearch={handleSearch} initialQuery={searchQuery} />
           </div>
         </div>
       </div>
@@ -305,13 +313,7 @@ const MoviesPage = () => {
           </>
         )}
       </div>
-
-      
-            
-          
-        
-      </div>
-    
+    </div>
   )
 }
 

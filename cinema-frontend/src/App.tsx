@@ -10,7 +10,6 @@ import ClubPage from "./pages/ClubPage"
 import RentPage from "./pages/RentPage"
 import CinemasPage from "./pages/CinemasPage"
 import AuthModal from "./components/AuthModal"
-import SearchPage from "./pages/SearchPage"
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage"
 import ContactUsPage from "./pages/ContactUsPage"
 import Footer from "./components/Footer"
@@ -23,6 +22,7 @@ import { ModalProvider } from "./context/ModalContext"
 import DashboardPage from "./pages/DashboardPage"
 import AdminDashboard from "./pages/AdminDashboard"
 import { PayPalScriptProvider } from "@paypal/react-paypal-js"
+import AboutUsPage from "./pages/AboutUsPage"
 
 const ScrollToTop = () => {
   const { pathname } = useLocation()
@@ -94,15 +94,12 @@ function App() {
                           <RentPage />
                         </div>
                       }
-                    />
-                    <Route
-                      path="/search"
-                      element={
-                        <div className="pt-32 container mx-auto p-4">
-                          <SearchPage />
-                        </div>
-                      }
-                    />
+                      />
+                       <Route 
+                       path="/AboutUsPage" 
+                       element={<AboutUsPage />} />
+                  
+                    
                     <Route
                       path="/privacy-policy"
                       element={
