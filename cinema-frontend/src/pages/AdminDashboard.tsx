@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import UserModal from "../components/UserModal"
 import MovieModal from "../components/MovieModal"
+import LogViewer from "../components/LogViewer" // ADD THIS - Import LogViewer
 import {
   fetchAdminMovies,
   createAdminMovie,
@@ -26,6 +27,7 @@ import {
   FaTicketAlt,
   FaDollarSign,
   FaSync,
+  FaClipboardList, // ADD THIS - Icon for logs tab
 } from "react-icons/fa"
 
 interface User {
@@ -404,7 +406,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Navigation Tabs - MODIFY THIS to add logs tab */}
         <div className="bg-white rounded-lg shadow-md mb-6">
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-6">
@@ -412,6 +414,7 @@ const AdminDashboard = () => {
                 { id: "overview", label: "Overview", icon: FaChartBar },
                 { id: "users", label: "User Management", icon: FaUsers },
                 { id: "movies", label: "Movie Management", icon: FaFilm },
+                { id: "logs", label: "Activity Logs", icon: FaClipboardList }, // ADD THIS - Logs tab
                 { id: "settings", label: "Settings", icon: FaCog },
               ].map((tab) => (
                 <button
@@ -658,6 +661,14 @@ const AdminDashboard = () => {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* ADD THIS - Logs tab content */}
+            {activeTab === "logs" && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-900">Activity Logs</h3>
+                <LogViewer />
               </div>
             )}
 

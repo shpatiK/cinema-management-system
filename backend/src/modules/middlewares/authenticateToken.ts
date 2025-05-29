@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: number; // Fixed: was userId
+    username: string; // Optional, if you want to include username
     role: string;
   };
 }
@@ -26,6 +27,7 @@ export const authenticateToken = (
 
     req.user = {
       id: decoded.id, // Fixed: was userId
+      username: decoded.username || '', 
       role: decoded.role,
     };
 

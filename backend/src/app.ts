@@ -1,6 +1,7 @@
 import express from "express"
 import dotenv from "dotenv"
 import { connectPostgres } from "./db/postgres"
+import { connectMongoDB } from "./db/mongo" // ADD THIS - MongoDB connection
 import { connectRedis } from "./cache/redisClient"
 import cors from "cors"
 import { config } from "./config"
@@ -9,12 +10,15 @@ import adminRoutes from "./modules/routes/adminRoutes"
 import bookingRoutes from "./modules/routes/bookingRoutes"
 import movieRoutes from "./modules/routes/movieRoutes"
 import showtimeRoutes from "./modules/routes/showtimeRoutes"
+import logRoutes from "./modules/routes/logRoutes" // ADD THIS - Log routes
 import path from "path"
 import expressStatusMonitor from "express-status-monitor"
 import { setupSwagger } from "./modules/swagger/swaggerConfig"
 import { sequelize } from "./db/postgres"
 import User from "./modules/models/User"
 import Movie from "./modules/models/Movie"
+import { requestLoggingMiddleware, errorLoggingMiddleware } from "./modules/middlewares/loggingMiddleware" // ADD THIS
+import { Logger } from "./modules/utils/logger" // ADD THIS
 
 dotenv.config()
 
@@ -23,10 +27,15 @@ const app = express()
 // Basic middleware
 app.use(express.json())
 app.use(expressStatusMonitor())
-app.use(cors({
-  origin: config.frontendUrl,
-}))
+app.use(
+  cors({
+    origin: config.frontendUrl,
+  }),
+)
 app.use("/posters", express.static(path.join(__dirname, "../public/posters")))
+
+// ADD THIS - Logging middleware BEFORE routes
+app.use(requestLoggingMiddleware)
 
 setupSwagger(app)
 
@@ -36,6 +45,7 @@ app.use("/api/admin", adminRoutes)
 app.use("/api/bookings", bookingRoutes)
 app.use("/api/movies", movieRoutes)
 app.use("/api/showtimes", showtimeRoutes)
+app.use("/api/admin/logs", logRoutes) // ADD THIS - Log routes
 
 // Basic route
 app.get("/", (req, res) => {
@@ -52,68 +62,102 @@ app.get("/health", (req, res) => {
   })
 })
 
-// Your database functions...
+// MODIFY THIS - Enhanced database initialization with MongoDB and logging
 async function initializeDatabase() {
   try {
     await connectPostgres()
+    await connectMongoDB() // ADD THIS - MongoDB connection
     await connectRedis()
     await sequelize.sync({ alter: true })
     console.log("✅ Databases connected and tables synced!")
 
+    // ADD THIS - Log system startup
+    await Logger.logSystem("SYSTEM_STARTUP", {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+    })
+
     // Create admin user if doesn't exist
-    await User.findOrCreate({
+    const [adminUser, created] = await User.findOrCreate({
       where: { username: "admin" },
       defaults: {
         username: "admin",
         password: "admin123",
         email: "admin@cinema.com",
         role: "admin",
+        isActive: true, // ADD THIS
       },
     })
 
+    // ADD THIS - Log admin user creation
+    if (created) {
+      await Logger.logSystem("ADMIN_USER_CREATED", {
+        userId: adminUser.id,
+        username: adminUser.username,
+      })
+    }
+
     // Create sample movies
-    await Movie.findOrCreate({
-      where: { title: "Inception" },
-      defaults: {
+    const sampleMovies = [
+      {
         title: "Inception",
         duration: 148,
         poster_url: "/posters/inception.jpg",
         release_year: 2010,
-        description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+        description:
+          "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
         director: "Christopher Nolan",
         actors: "Leonardo DiCaprio, Marion Cotillard, Tom Hardy",
       },
-    })
-
-    await Movie.findOrCreate({
-      where: { title: "The Dark Knight" },
-      defaults: {
+      {
         title: "The Dark Knight",
         duration: 152,
         poster_url: "/posters/dark-knight.jpg",
         release_year: 2008,
-        description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests.",
+        description:
+          "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests.",
         director: "Christopher Nolan",
         actors: "Christian Bale, Heath Ledger, Aaron Eckhart",
       },
-    })
-
-    await Movie.findOrCreate({
-      where: { title: "Interstellar" },
-      defaults: {
+      {
         title: "Interstellar",
         duration: 169,
         poster_url: "/posters/interstellar.jpg",
         release_year: 2014,
-        description: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+        description:
+          "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
         director: "Christopher Nolan",
         actors: "Matthew McConaughey, Anne Hathaway, Jessica Chastain",
       },
-    })
+    ]
+
+    // ADD THIS - Log movie creation
+    for (const movieData of sampleMovies) {
+      const [movie, movieCreated] = await Movie.findOrCreate({
+        where: { title: movieData.title },
+        defaults: movieData,
+      })
+
+      if (movieCreated) {
+        await Logger.logSystem("SAMPLE_MOVIE_CREATED", {
+          movieId: movie.id,
+          title: movie.title,
+        })
+      }
+    }
 
     await createSampleShowtimes()
   } catch (error) {
     console.error("❌ Database initialization failed:", error)
+    // ADD THIS - Log startup failure
+    await Logger.logSystem(
+      "SYSTEM_STARTUP_FAILED",
+      {
+        error: error.message,
+        stack: error.stack,
+      },
+      "ERROR",
+    )
     process.exit(1)
   }
 }
@@ -174,6 +218,9 @@ async function createSampleShowtimes() {
   }
 }
 
+// ADD THIS - Error logging middleware AFTER routes
+app.use(errorLoggingMiddleware)
+
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error("❌ Server Error:", err.stack)
@@ -203,17 +250,34 @@ async function startServer() {
       console.log(`🌐 Allowing requests from ${config.frontendUrl}`)
       console.log(`📊 Status monitor at ${config.apiUrl}/status`)
       console.log("✅ Cinema Management System is ready!")
+
+      // ADD THIS - Log successful startup
+      Logger.logSystem("SERVER_STARTED", {
+        port: config.port,
+        apiUrl: config.apiUrl,
+        frontendUrl: config.frontendUrl,
+      })
     })
   } catch (error) {
     console.error("❌ Fatal startup error:", error)
+    // ADD THIS - Log startup failure
+    await Logger.logSystem(
+      "SERVER_STARTUP_FAILED",
+      {
+        error: error.message,
+        stack: error.stack,
+      },
+      "ERROR",
+    )
     process.exit(1)
   }
 }
 
-// Graceful shutdown
+// MODIFY THIS - Enhanced graceful shutdown with logging
 process.on("SIGTERM", async () => {
   console.log("🛑 SIGTERM received, shutting down gracefully...")
   try {
+    await Logger.logSystem("SERVER_SHUTDOWN", { reason: "SIGTERM" }) // ADD THIS
     await sequelize.close()
     console.log("✅ Database connections closed")
     process.exit(0)
@@ -226,6 +290,7 @@ process.on("SIGTERM", async () => {
 process.on("SIGINT", async () => {
   console.log("🛑 SIGINT received, shutting down gracefully...")
   try {
+    await Logger.logSystem("SERVER_SHUTDOWN", { reason: "SIGINT" }) // ADD THIS
     await sequelize.close()
     console.log("✅ Database connections closed")
     process.exit(0)
